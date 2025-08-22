@@ -14,7 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      weekly_responses: {
+        Row: {
+          created_at: string
+          id: string
+          responded_at: string | null
+          response_token: string
+          status: string
+          updated_at: string
+          user_id: string
+          week_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          responded_at?: string | null
+          response_token?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          week_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          responded_at?: string | null
+          response_token?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          week_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
