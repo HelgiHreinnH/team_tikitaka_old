@@ -111,7 +111,7 @@ const Index = () => {
               <div className="max-w-md mx-auto lg:mx-0">
                 <Card>
                   <CardHeader>
-                    <CardTitle>want to join?</CardTitle>
+                    <CardTitle>⚽ Ready to play with us?</CardTitle>
                     <CardDescription>
                       Register to receive weekly training invitations
                     </CardDescription>
