@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { getNextWednesday, formatWeekDate } from "@/lib/utils";
+import { getNextWednesday, formatWeekDate, generateCalendarEvent } from "@/lib/utils";
 
 const Index = () => {
   const [name, setName] = useState("");
@@ -147,6 +147,23 @@ const Index = () => {
               </form>
             </CardContent>
           </Card>
+        </div>
+
+        {/* When Section */}
+        <div className="max-w-4xl mx-auto mt-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">When</h2>
+            <p className="text-xl text-muted-foreground mb-6">
+              Every Wednesday at <span className="font-semibold">17:30</span>
+            </p>
+            <Button 
+              onClick={generateCalendarEvent}
+              variant="outline"
+              className="inline-flex items-center gap-2"
+            >
+              📅 Add to Calendar
+            </Button>
+          </div>
         </div>
 
         {/* Where Section */}
