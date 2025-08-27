@@ -102,7 +102,7 @@ const Index = () => {
               <div className="max-w-md mx-auto lg:mx-0">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Join the Team</CardTitle>
+                    <CardTitle>want to join?</CardTitle>
                     <CardDescription>
                       Register to receive weekly training invitations
                     </CardDescription>
