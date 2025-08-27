@@ -129,6 +129,16 @@ const Index = () => {
                         />
                       </div>
                       <div>
+                        <Label htmlFor="nickname">Nickname (Optional)</Label>
+                        <Input
+                          id="nickname"
+                          type="text"
+                          value={nickname}
+                          onChange={(e) => setNickname(e.target.value)}
+                          placeholder="What name do you want to show when attending"
+                        />
+                      </div>
+                      <div>
                         <Label htmlFor="email">Email *</Label>
                         <Input
                           id="email"
@@ -147,16 +157,6 @@ const Index = () => {
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="Enter your phone number"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="nickname">Nickname (Optional)</Label>
-                        <Input
-                          id="nickname"
-                          type="text"
-                          value={nickname}
-                          onChange={(e) => setNickname(e.target.value)}
-                          placeholder="What name do you want to show when attending"
                         />
                       </div>
                       <div className="flex justify-end">
