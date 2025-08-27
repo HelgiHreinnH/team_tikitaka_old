@@ -94,97 +94,108 @@ const Index = () => {
           </h1>
         </div>
 
-        {/* Registration Form */}
-        <div className="max-w-md mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle>Join the Team</CardTitle>
-              <CardDescription>
-                Register to receive weekly training invitations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone (Optional)</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Registering..." : "Join Tiki Taka"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* When & Where Section */}
-        <div className="max-w-6xl mx-auto mt-16 px-4">
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
-            {/* When Section - Full width on mobile, 1/3 on desktop */}
-            <div className="w-full lg:w-1/3">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold mb-4">When</h2>
-                <p className="text-xl text-muted-foreground mb-6">
-                  Every Wednesday at <span className="font-semibold">17:30</span>
-                </p>
-                <Button 
-                  onClick={generateCalendarEvent}
-                  variant="outline"
-                  className="inline-flex items-center gap-2"
-                >
-                  📅 Add to Calendar
-                </Button>
+        {/* Main Content Section */}
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Registration Form - Full width on mobile, 2/3 on desktop */}
+            <div className="w-full lg:w-2/3">
+              <div className="max-w-md mx-auto lg:mx-0">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Join the Team</CardTitle>
+                    <CardDescription>
+                      Register to receive weekly training invitations
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="name">Full Name *</Label>
+                        <Input
+                          id="name"
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="Enter your full name"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="Enter your email"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="phone">Phone (Optional)</Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="Enter your phone number"
+                        />
+                      </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Registering..." : "Join Tiki Taka"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
               </div>
             </div>
 
-            {/* Where Section - Full width on mobile, 2/3 on desktop */}
-            <div className="w-full lg:w-2/3">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-4">Where</h2>
+            {/* When & Where Section - Full width on mobile, 1/3 on desktop */}
+            <div className="w-full lg:w-1/3 flex flex-col gap-4 lg:gap-0">
+              {/* When Section - 1/4 height on desktop */}
+              <div className="lg:h-1/4 flex flex-col justify-center">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold mb-2">When</h2>
+                  <p className="text-lg text-muted-foreground mb-4">
+                    Every Wednesday at <span className="font-semibold">17:30</span>
+                  </p>
+                  <Button 
+                    onClick={generateCalendarEvent}
+                    variant="outline"
+                    size="sm"
+                    className="inline-flex items-center gap-2"
+                  >
+                    📅 Add to Calendar
+                  </Button>
+                </div>
               </div>
-              <div className="flex justify-center">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d292.4767945840716!2d12.6027670635004!3d55.67695706315111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465253531e198fb7%3A0x2c29b04b36ce797a!2sKunststofbanen%2C%20Arsenalvej!5e0!3m2!1sen!2sdk!4v1756320819653!5m2!1sen!2sdk" 
-                  width="100%" 
-                  height="300"
-                  style={{border: 0}} 
-                  allowFullScreen={true}
-                  loading="lazy" 
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="rounded-lg shadow-lg max-w-full lg:h-[450px] h-[300px]"
-                />
+
+              {/* Where Section - 3/4 height on desktop */}
+              <div className="lg:h-3/4 flex flex-col">
+                <div className="text-center mb-4">
+                  <h2 className="text-2xl font-bold mb-2">Where</h2>
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <div 
+                    className="w-full h-full min-h-[300px] lg:min-h-0 cursor-pointer rounded-lg overflow-hidden shadow-lg"
+                    onClick={() => window.open('https://maps.google.com/?q=Kunststofbanen,+Arsenalvej,+Arsenalvej+2,+1436+København', '_blank')}
+                  >
+                    <iframe 
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d292.4767945840716!2d12.6027670635004!3d55.67695706315111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465253531e198fb7%3A0x2c29b04b36ce797a!2sKunststofbanen%2C%20Arsenalvej!5e0!3m2!1sen!2sdk!4v1756320819653!5m2!1sen!2sdk" 
+                      width="100%" 
+                      height="100%"
+                      style={{border: 0, pointerEvents: 'none'}} 
+                      allowFullScreen={true}
+                      loading="lazy" 
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="w-full h-full"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
