@@ -203,10 +203,9 @@ const Index = () => {
 
         {/* Quick Links */}
         <div className="text-center mt-16 space-y-4">
-          <p className="text-sm text-muted-foreground">Quick Links</p>
           <div className="flex justify-center gap-4">
             <Button variant="outline" asChild>
-              <a href="/whos-playing">Who's Playing?</a>
+              <a href="/whos-playing">See who's joining next session</a>
             </Button>
           </div>
         </div>
