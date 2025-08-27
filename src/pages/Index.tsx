@@ -224,7 +224,7 @@ const Index = () => {
               {/* When Section - 1/4 height on desktop */}
               <div className="lg:h-1/4 flex flex-col justify-center">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-2">When</h2>
+                  <h2 className="text-2xl font-bold mb-2">⏰ When</h2>
                   <p className="text-lg text-muted-foreground mb-4">
                     Every Wednesday at <span className="font-semibold">17:30</span>
                   </p>
@@ -242,7 +242,7 @@ const Index = () => {
               {/* Where Section - 3/4 height on desktop */}
               <div className="lg:h-3/4 flex flex-col">
                 <div className="text-center mb-4">
-                  <h2 className="text-2xl font-bold mb-2">Where</h2>
+                  <h2 className="text-2xl font-bold mb-2">📍 Where</h2>
                 </div>
                 <div className="flex-1 flex justify-center">
                   <div 
