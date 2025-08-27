@@ -141,13 +141,15 @@ const Index = () => {
                           placeholder="Enter your phone number"
                         />
                       </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Registering..." : "Join Tiki Taka"}
-                      </Button>
+                      <div className="flex justify-end">
+                        <Button 
+                          type="submit" 
+                          className="w-auto"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Registering..." : "Join Tiki Taka"}
+                        </Button>
+                      </div>
                     </form>
                   </CardContent>
                 </Card>
