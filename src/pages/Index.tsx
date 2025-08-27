@@ -149,39 +149,44 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* When Section */}
-        <div className="max-w-4xl mx-auto mt-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">When</h2>
-            <p className="text-xl text-muted-foreground mb-6">
-              Every Wednesday at <span className="font-semibold">17:30</span>
-            </p>
-            <Button 
-              onClick={generateCalendarEvent}
-              variant="outline"
-              className="inline-flex items-center gap-2"
-            >
-              📅 Add to Calendar
-            </Button>
-          </div>
-        </div>
+        {/* When & Where Section */}
+        <div className="max-w-6xl mx-auto mt-16">
+          <div className="flex gap-8 items-start">
+            {/* When Section - 1/3 width */}
+            <div className="w-1/3">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold mb-4">When</h2>
+                <p className="text-xl text-muted-foreground mb-6">
+                  Every Wednesday at <span className="font-semibold">17:30</span>
+                </p>
+                <Button 
+                  onClick={generateCalendarEvent}
+                  variant="outline"
+                  className="inline-flex items-center gap-2"
+                >
+                  📅 Add to Calendar
+                </Button>
+              </div>
+            </div>
 
-        {/* Where Section */}
-        <div className="max-w-4xl mx-auto mt-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Where</h2>
-          </div>
-          <div className="flex justify-center">
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d292.4767945840716!2d12.6027670635004!3d55.67695706315111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465253531e198fb7%3A0x2c29b04b36ce797a!2sKunststofbanen%2C%20Arsenalvej!5e0!3m2!1sen!2sdk!4v1756320819653!5m2!1sen!2sdk" 
-              width="600" 
-              height="450" 
-              style={{border: 0}} 
-              allowFullScreen={true}
-              loading="lazy" 
-              referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-lg shadow-lg max-w-full"
-            />
+            {/* Where Section - 2/3 width */}
+            <div className="w-2/3">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">Where</h2>
+              </div>
+              <div className="flex justify-center">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d292.4767945840716!2d12.6027670635004!3d55.67695706315111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465253531e198fb7%3A0x2c29b04b36ce797a!2sKunststofbanen%2C%20Arsenalvej!5e0!3m2!1sen!2sdk!4v1756320819653!5m2!1sen!2sdk" 
+                  width="100%" 
+                  height="450" 
+                  style={{border: 0}} 
+                  allowFullScreen={true}
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="rounded-lg shadow-lg max-w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
