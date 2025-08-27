@@ -118,50 +118,78 @@ const Index = () => {
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <div>
-                        <Label htmlFor="name">Full Name *</Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Enter your full name"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="nickname">Nickname (Optional)</Label>
-                        <Input
-                          id="nickname"
-                          type="text"
-                          value={nickname}
-                          onChange={(e) => setNickname(e.target.value)}
-                          placeholder="What name do you want to show when attending"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="Enter your email"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="phone">Phone (Optional)</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="Enter your phone number"
-                        />
-                      </div>
-                      <div className="flex justify-end">
-                        <TooltipProvider>
+                      <TooltipProvider>
+                        <div>
+                          <Label htmlFor="name">Full Name *</Label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Input
+                                id="name"
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Enter your full name"
+                                required
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Your real name for our team records 📝</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <div>
+                          <Label htmlFor="nickname">Nickname (Optional)</Label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Input
+                                id="nickname"
+                                type="text"
+                                value={nickname}
+                                onChange={(e) => setNickname(e.target.value)}
+                                placeholder="What name do you want to show when attending"
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">What we'll call you on the pitch! 🏃‍♂️</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <div>
+                          <Label htmlFor="email">Email *</Label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Enter your email"
+                                required
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">We'll send your weekly invites here 📧</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <div>
+                          <Label htmlFor="phone">Phone (Optional)</Label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Input
+                                id="phone"
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                placeholder="Enter your phone number"
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">Just in case we need to reach you quickly 📱</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <div className="flex justify-end">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button 
@@ -183,8 +211,8 @@ const Index = () => {
                               </div>
                             </TooltipContent>
                           </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                        </div>
+                      </TooltipProvider>
                     </form>
                   </CardContent>
                 </Card>
