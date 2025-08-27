@@ -11,6 +11,7 @@ const Index = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [nickname, setNickname] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,10 +28,16 @@ const Index = () => {
     setIsSubmitting(true);
 
     try {
-      // Insert user
+      // Insert user with nickname fallback logic
+      const displayNickname = nickname.trim() || name.trim();
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .insert([{ name: name.trim(), email: email.trim(), phone: phone.trim() || null }])
+        .insert([{ 
+          name: name.trim(), 
+          email: email.trim(), 
+          phone: phone.trim() || null,
+          nickname: displayNickname
+        }])
         .select()
         .single();
 
@@ -70,6 +77,7 @@ const Index = () => {
       setName("");
       setEmail("");
       setPhone("");
+      setNickname("");
 
     } catch (error) {
       console.error('Registration error:', error);
@@ -139,6 +147,16 @@ const Index = () => {
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="Enter your phone number"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="nickname">Nickname (Optional)</Label>
+                        <Input
+                          id="nickname"
+                          type="text"
+                          value={nickname}
+                          onChange={(e) => setNickname(e.target.value)}
+                          placeholder="What name do you want to show when attending"
                         />
                       </div>
                       <div className="flex justify-end">
