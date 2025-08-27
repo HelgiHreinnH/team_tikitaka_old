@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getNextWednesday, formatWeekDate, generateCalendarEvent } from "@/lib/utils";
 
 const Index = () => {
@@ -160,13 +161,29 @@ const Index = () => {
                         />
                       </div>
                       <div className="flex justify-end">
-                        <Button 
-                          type="submit" 
-                          className="w-auto"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? "Registering..." : "Join Tiki Taka"}
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                type="submit" 
+                                className="w-auto"
+                                disabled={isSubmitting}
+                              >
+                                {isSubmitting ? "Registering..." : "Join Tiki Taka"}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-xs">
+                              <div className="text-center p-2">
+                                <p className="font-semibold text-sm mb-1">🎉 Ready to join the fun?</p>
+                                <p className="text-xs text-muted-foreground">
+                                  You'll get weekly email invites for our Wednesday training sessions. 
+                                  Just click "yes" or "no" to let us know if you're coming! 
+                                  Simple as that! ⚽
+                                </p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </form>
                   </CardContent>
