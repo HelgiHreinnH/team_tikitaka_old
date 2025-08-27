@@ -89,7 +89,7 @@ const Index = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <h1 className="text-6xl font-black mb-6 tracking-tight">
-            TIKI TAKA
+            TIKI TAKA FOOTBALL TEAM
           </h1>
         </div>
 
