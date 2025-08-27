@@ -95,9 +95,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-6xl font-black mb-6 tracking-tight">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-black mb-4 tracking-tight">
             TIKI TAKA<br />
             FOOTBALL TEAM
           </h1>
@@ -267,7 +267,7 @@ const Index = () => {
         </div>
 
         {/* Quick Links */}
-        <div className="text-center mt-16 space-y-4">
+        <div className="text-center mt-8 space-y-4">
           <div className="flex justify-center gap-4">
             <Button variant="outline" asChild>
               <a href="/whos-playing">See who's joining next session</a>
