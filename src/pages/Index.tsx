@@ -95,7 +95,7 @@ const Index = () => {
         </div>
 
         {/* Main Content Section */}
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Registration Form - Full width on mobile, 2/3 on desktop */}
             <div className="w-full lg:w-2/3">
