@@ -225,7 +225,7 @@ const Index = () => {
               <div className="lg:h-1/4 flex flex-col justify-center">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold mb-2">⏰ When</h2>
-                  <p className="text-lg text-muted-foreground mb-4">
+                  <p className="text-lg text-muted-foreground mb-2">
                     Every Wednesday at <span className="font-semibold">17:30</span>
                   </p>
                   <Button 
