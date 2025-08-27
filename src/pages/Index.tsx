@@ -91,12 +91,6 @@ const Index = () => {
           <h1 className="text-6xl font-black mb-6 tracking-tight">
             TIKI TAKA
           </h1>
-          <p className="text-xl text-muted-foreground mb-4 max-w-2xl mx-auto">
-            Minimalist football team management for weekly training sessions.
-          </p>
-          <p className="text-lg text-muted-foreground">
-            Every Wednesday at <span className="font-semibold">17:30</span>
-          </p>
         </div>
 
         {/* Registration Form */}
