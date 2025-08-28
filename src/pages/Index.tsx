@@ -270,7 +270,7 @@ const Index = () => {
         <div className="text-center mt-8 space-y-4">
           <div className="flex justify-center gap-4">
             <Button variant="outline" asChild>
-              <a href="/whos-playing">See who's joining next session</a>
+              <a href="https://tikitaka.desiningforusers.com/whos-playing">See who's joining next session</a>
             </Button>
           </div>
         </div>
