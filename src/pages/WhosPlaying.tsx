@@ -143,7 +143,6 @@ const WhosPlaying = () => {
                   <CardContent className="flex justify-between items-center py-4">
                     <div>
                       <h3 className="font-semibold">{user.nickname || user.name}</h3>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
                     <Badge className={getStatusColor(status)}>
                       {getStatusLabel(status)}
