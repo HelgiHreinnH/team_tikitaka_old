@@ -2,3 +2,6 @@ project_id = "rifwpmohngsieuyhfjwx"
 
 [functions.send-weekly-invites]
 verify_jwt = false
+
+[functions.reset-weekly-responses]
+verify_jwt = false
