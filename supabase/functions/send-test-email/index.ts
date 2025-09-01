@@ -1,4 +1,7 @@
 import { Resend } from 'npm:resend@4.0.0'
+import { renderAsync } from 'npm:@react-email/components@0.0.22'
+import React from 'npm:react@18.3.1'
+import { WeeklyInvitationEmail } from './_templates/weekly-invitation.tsx'
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY')
 console.log('RESEND_API_KEY exists:', !!resendApiKey)
@@ -36,29 +39,26 @@ Deno.serve(async (req) => {
 
     console.log('Attempting to send email to:', email)
     
+    // Generate a test response token (in real implementation, this would come from database)
+    const testToken = 'test-token-' + Date.now()
+    const weekDate = 'Wednesday, September 4th, 2025'
+    const baseUrl = 'https://tikitaka.desiningforusers.com'
+    
+    // Render the email template
+    const emailHtml = await renderAsync(
+      React.createElement(WeeklyInvitationEmail, {
+        playerName: 'Helgi',
+        weekDate,
+        responseToken: testToken,
+        baseUrl,
+      })
+    )
+    
     const { data, error } = await resend.emails.send({
       from: 'Tiki Taka <onboarding@resend.dev>',
       to: [email],
-      subject: 'Test Email from Tiki Taka ⚽',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #333; text-align: center;">Tiki Taka Test Email ⚽</h1>
-          <p style="color: #666; font-size: 16px; line-height: 1.5;">
-            This is a test email from your Tiki Taka application!
-          </p>
-          <p style="color: #666; font-size: 16px; line-height: 1.5;">
-            If you're seeing this, your email configuration is working correctly.
-          </p>
-          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #333; font-weight: bold;">Test Details:</p>
-            <p style="margin: 5px 0 0 0; color: #666;">Sent to: ${email}</p>
-            <p style="margin: 5px 0 0 0; color: #666;">Timestamp: ${new Date().toISOString()}</p>
-          </div>
-          <p style="color: #999; font-size: 14px; text-align: center; margin-top: 30px;">
-            Sent from Tiki Taka Football App
-          </p>
-        </div>
-      `,
+      subject: 'Ready for Tiki Taka this Wednesday? ⚽',
+      html: emailHtml,
     })
 
     if (error) {
