@@ -8,7 +8,6 @@ import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getNextWednesday, formatWeekDate, generateCalendarEvent } from "@/lib/utils";
-import { EmailTest } from "@/components/EmailTest";
 
 const Index = () => {
   const [name, setName] = useState("");
@@ -277,10 +276,15 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Email Test */}
-        <div className="max-w-md mx-auto mt-8">
-          <EmailTest />
-        </div>
+        {/* Footer */}
+        <footer className="text-center mt-16 py-8">
+          <p className="text-xs text-muted-foreground">
+            Weekly training sessions every Wednesday at 17:30
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Kunststofbanen, Arsenalvej 2, København
+          </p>
+        </footer>
       </div>
     </div>
   );
