@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getNextWednesday, formatWeekDate, generateCalendarEvent } from "@/lib/utils";
+import { EmailTest } from "@/components/EmailTest";
 
 const Index = () => {
   const [name, setName] = useState("");
@@ -273,6 +274,11 @@ const Index = () => {
               <a href="https://tikitaka.desiningforusers.com/whos-playing">See who's joining next session</a>
             </Button>
           </div>
+        </div>
+
+        {/* Email Test */}
+        <div className="max-w-md mx-auto mt-8">
+          <EmailTest />
         </div>
       </div>
     </div>
