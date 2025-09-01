@@ -1,6 +1,13 @@
 import { Resend } from 'npm:resend@4.0.0'
 
-const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string)
+const resendApiKey = Deno.env.get('RESEND_API_KEY')
+console.log('RESEND_API_KEY exists:', !!resendApiKey)
+
+if (!resendApiKey) {
+  throw new Error('RESEND_API_KEY environment variable is not set')
+}
+
+const resend = new Resend(resendApiKey)
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,8 +34,10 @@ Deno.serve(async (req) => {
       })
     }
 
+    console.log('Attempting to send email to:', email)
+    
     const { data, error } = await resend.emails.send({
-      from: 'Tiki Taka <auth@yourdomain.com>',
+      from: 'Tiki Taka <onboarding@resend.dev>',
       to: [email],
       subject: 'Test Email from Tiki Taka ⚽',
       html: `
