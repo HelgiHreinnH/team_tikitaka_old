@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +22,12 @@ const WhosPlaying = () => {
       const weekDate = formatWeekDate(nextWednesday);
       setCurrentWeek(weekDate);
 
+      // Fetch all users and their responses for this week (left join to show all users)
       const { data, error } = await supabase
         .from('users')
         .select(`
           *,
-          weekly_responses!inner(*)
+          weekly_responses(*)
         `)
         .eq('weekly_responses.week_date', weekDate)
         .order('name');
@@ -80,19 +82,19 @@ const WhosPlaying = () => {
   }
 
   const playingCount = users.filter(user => 
-    user.weekly_responses[0]?.status === 'yes'
+    user.weekly_responses?.[0]?.status === 'yes'
   ).length;
 
   const maybeCount = users.filter(user => 
-    user.weekly_responses[0]?.status === 'maybe'
+    user.weekly_responses?.[0]?.status === 'maybe'
   ).length;
 
   const notPlayingCount = users.filter(user => 
-    user.weekly_responses[0]?.status === 'no'
+    user.weekly_responses?.[0]?.status === 'no'
   ).length;
 
   const noResponseCount = users.filter(user => 
-    !user.weekly_responses[0] || user.weekly_responses[0]?.status === 'no_response'
+    !user.weekly_responses?.[0] || user.weekly_responses[0]?.status === 'no_response'
   ).length;
 
   return (
@@ -127,20 +129,20 @@ const WhosPlaying = () => {
               <CardContent className="text-center py-8">
                 <p className="text-muted-foreground">No players registered yet.</p>
                 <Button asChild className="mt-4">
-                  <a href="/">Join the Team</a>
+                  <Link to="/">Join the Team</Link>
                 </Button>
               </CardContent>
             </Card>
           ) : (
             users.map((user) => {
-              const response = user.weekly_responses[0];
+              const response = user.weekly_responses?.[0];
               const status = (response?.status as ResponseStatus) || 'no_response';
               
               return (
                 <Card key={user.id}>
                   <CardContent className="flex justify-between items-center py-4">
                     <div>
-                      <h3 className="font-semibold">{user.name}</h3>
+                      <h3 className="font-semibold">{user.nickname || user.name}</h3>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
                     <Badge className={getStatusColor(status)}>
@@ -156,7 +158,7 @@ const WhosPlaying = () => {
         {/* Back to Home */}
         <div className="text-center mt-16">
           <Button variant="outline" asChild>
-            <a href="/">← Back to Home</a>
+            <Link to="/">← Back to Home</Link>
           </Button>
         </div>
       </div>

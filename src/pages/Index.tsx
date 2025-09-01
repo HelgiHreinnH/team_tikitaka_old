@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getNextWednesday, formatWeekDate, generateCalendarEvent } from "@/lib/utils";
 import { EmailTest } from "@/components/EmailTest";
@@ -271,7 +272,7 @@ const Index = () => {
         <div className="text-center mt-8 space-y-4">
           <div className="flex justify-center gap-4">
             <Button variant="outline" asChild>
-              <a href="https://tikitaka.desiningforusers.com/whos-playing">See who's joining next session</a>
+              <Link to="/whos-playing">See who's joining next session</Link>
             </Button>
           </div>
         </div>
