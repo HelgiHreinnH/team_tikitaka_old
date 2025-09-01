@@ -1,1 +1,4 @@
 project_id = "rifwpmohngsieuyhfjwx"
+
+[functions.send-weekly-invites]
+verify_jwt = false
