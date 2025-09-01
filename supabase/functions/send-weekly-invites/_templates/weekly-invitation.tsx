@@ -70,6 +70,14 @@ export const WeeklyInvitationEmail = ({
             </Column>
             <Column style={buttonColumn}>
               <Link
+                href={`${baseUrl}/respond/${responseToken}?response=maybe`}
+                style={maybeButton}
+              >
+                Maybe 🤔
+              </Link>
+            </Column>
+            <Column style={buttonColumn}>
+              <Link
                 href={`${baseUrl}/respond/${responseToken}?response=no`}
                 style={noButton}
               >
@@ -174,8 +182,8 @@ const buttonSection = {
 }
 
 const buttonColumn = {
-  width: '50%',
-  padding: '0 8px',
+  width: '33.33%',
+  padding: '0 4px',
 }
 
 const yesButton = {
@@ -184,10 +192,26 @@ const yesButton = {
   color: '#ffffff',
   display: 'block',
   fontFamily: "'Inter', sans-serif",
-  fontSize: '16px',
+  fontSize: '14px',
   fontWeight: '600',
   lineHeight: '1.2',
-  padding: '16px 24px',
+  padding: '12px 16px',
+  textAlign: 'center' as const,
+  textDecoration: 'none',
+  width: '100%',
+  boxSizing: 'border-box' as const,
+}
+
+const maybeButton = {
+  backgroundColor: '#f59e0b',
+  borderRadius: '8px',
+  color: '#ffffff',
+  display: 'block',
+  fontFamily: "'Inter', sans-serif",
+  fontSize: '14px',
+  fontWeight: '600',
+  lineHeight: '1.2',
+  padding: '12px 16px',
   textAlign: 'center' as const,
   textDecoration: 'none',
   width: '100%',
@@ -200,10 +224,10 @@ const noButton = {
   color: '#ffffff',
   display: 'block',
   fontFamily: "'Inter', sans-serif",
-  fontSize: '16px',
+  fontSize: '14px',
   fontWeight: '600',
   lineHeight: '1.2',
-  padding: '16px 24px',
+  padding: '12px 16px',
   textAlign: 'center' as const,
   textDecoration: 'none',
   width: '100%',
