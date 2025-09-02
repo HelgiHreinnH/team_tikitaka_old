@@ -125,6 +125,9 @@ serve(async (req) => {
         } else {
           console.log(`✅ Correction email sent successfully to ${user.email}`);
           successCount++;
+          
+          // Add delay to respect Resend rate limit (2 requests per second)
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
 
       } catch (userError) {
