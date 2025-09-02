@@ -10,10 +10,12 @@ import { getStatusColor, getStatusLabel, getNextWednesday, formatWeekDate, forma
 const WhosPlaying = () => {
   const [users, setUsers] = useState<UserWithPublicResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentWeek, setCurrentWeek] = useState<string>("");
 
   const fetchAttendance = async () => {
     try {
+      setError(null);
       const nextWednesday = getNextWednesday();
       const weekDate = formatWeekDate(nextWednesday);
       setCurrentWeek(weekDate);
@@ -31,24 +33,29 @@ const WhosPlaying = () => {
       
       if (error) {
         console.error('Error fetching users:', error);
+        setError('Failed to load attendance data. Please try refreshing the page.');
         return;
       }
 
-      // Filter responses to only show current week's data and ensure proper typing
-      const filteredData = usersData?.map(user => ({
-        ...user,
-        weekly_responses_public: user.weekly_responses_public?.filter(
-          (response: any) => response.week_date === weekDate
-        ).map((response: any) => ({
+      // Filter responses to only show current week's data with proper typing
+      const filteredData = usersData?.map(user => {
+        const filteredResponses = user.weekly_responses_public?.filter(
+          (response) => response.week_date === weekDate
+        ).map((response) => ({
           ...response,
-          status: response.status as ResponseStatus || 'no_response'
-        })) || []
-      })) || [];
+          status: (response.status as ResponseStatus) || 'no_response'
+        })) || [];
 
-      // Use the filtered data with proper typing
-      setUsers(filteredData as UserWithPublicResponse[]);
+        return {
+          ...user,
+          weekly_responses_public: filteredResponses
+        };
+      }) || [];
+
+      setUsers(filteredData);
     } catch (error) {
       console.error('Error fetching attendance:', error);
+      setError('Something went wrong. Please try refreshing the page.');
     } finally {
       setLoading(false);
     }
@@ -68,10 +75,11 @@ const WhosPlaying = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'weekly_responses_public',
+          table: 'weekly_responses',
           filter: `week_date=eq.${getCurrentWeekFilter()}`
         },
         () => {
+          console.log('Real-time update received, refreshing attendance...');
           fetchAttendance();
         }
       )
@@ -88,6 +96,26 @@ const WhosPlaying = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-4"></div>
           <p>Loading attendance...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="text-red-500 mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold mb-2">Unable to load attendance</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Refresh Page
+          </Button>
+          <div className="mt-4">
+            <Button asChild variant="ghost">
+              <Link to="/">← Back to Home</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -169,7 +197,7 @@ const WhosPlaying = () => {
                 <Card key={user.id} className={`${getBorderColor(status)} transition-colors`}>
                   <CardContent className="flex justify-between items-center py-4">
                     <div>
-                      <h3 className="font-semibold">{user.nickname || 'Player'}</h3>
+                      <h3 className="font-semibold">{user.nickname || 'Anonymous Player'}</h3>
                       <p className="text-xs text-muted-foreground">
                         {response?.responded_at 
                           ? `Responded ${new Date(response.responded_at).toLocaleDateString()}`
