@@ -4,9 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-import { ArrowLeft, FileText, CheckCircle, AlertCircle, Activity, Mail, BarChart3 } from "lucide-react";
+import { ArrowLeft, FileText, CheckCircle, AlertCircle, Activity, Mail, BarChart3, Send } from "lucide-react";
 
 const Admin = () => {
   const [sendingCorrection, setSendingCorrection] = useState(false);
@@ -16,6 +20,12 @@ const Admin = () => {
   const [diagnosticsResults, setDiagnosticsResults] = useState<any[]>([]);
   const [resendDiagnosticsRunning, setResendDiagnosticsRunning] = useState(false);
   const [resendData, setResendData] = useState<any>(null);
+  
+  // Custom email state
+  const [customEmailSubject, setCustomEmailSubject] = useState("");
+  const [customEmailMessage, setCustomEmailMessage] = useState("");
+  const [includeResponseLink, setIncludeResponseLink] = useState(false);
+  const [sendingCustomEmail, setSendingCustomEmail] = useState(false);
 
   const sendCorrectionEmail = async () => {
     setSendingCorrection(true);
@@ -198,6 +208,59 @@ const Admin = () => {
     }
   };
 
+  const sendCustomEmail = async () => {
+    if (!customEmailSubject.trim() || !customEmailMessage.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both subject and message fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSendingCustomEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-custom-email', {
+        body: {
+          subject: customEmailSubject,
+          message: customEmailMessage,
+          includeResponseLink: includeResponseLink
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Custom emails sent! 📧",
+        description: `Successfully sent ${data.emailsSent} emails to users.`,
+      });
+
+      // Add to logs
+      const logEntry = `${new Date().toISOString()}: Custom emails sent - ${JSON.stringify(data)}`;
+      setLogs(prev => [logEntry, ...prev]);
+
+      // Reset form
+      setCustomEmailSubject("");
+      setCustomEmailMessage("");
+      setIncludeResponseLink(false);
+
+    } catch (error) {
+      console.error('Error sending custom emails:', error);
+      const logEntry = `${new Date().toISOString()}: ERROR sending custom emails - ${error.message}`;
+      setLogs(prev => [logEntry, ...prev]);
+      
+      toast({
+        title: "Error",
+        description: "Failed to send custom emails. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingCustomEmail(false);
+    }
+  };
+
   const currentLog = logs.length > 0 ? logs[0] : "No recent activity";
 
   return (
@@ -287,6 +350,57 @@ const Admin = () => {
                     <Mail className="h-4 w-4 mr-2" />
                     {sendingCorrection ? "Sending..." : "Send Correction Mail to Admin"}
                   </Button>
+                </div>
+
+                <div className="p-3 sm:p-4 border rounded-lg bg-muted/50">
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Send Custom Email</h4>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+                    Send a custom email to all users with your own subject and message.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="email-subject" className="text-sm font-medium">Subject</Label>
+                      <Input
+                        id="email-subject"
+                        value={customEmailSubject}
+                        onChange={(e) => setCustomEmailSubject(e.target.value)}
+                        placeholder="Enter email subject..."
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="email-message" className="text-sm font-medium">Message</Label>
+                      <Textarea
+                        id="email-message"
+                        value={customEmailMessage}
+                        onChange={(e) => setCustomEmailMessage(e.target.value)}
+                        placeholder="Enter your message here..."
+                        className="mt-1 min-h-[120px]"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="include-response-link"
+                        checked={includeResponseLink}
+                        onCheckedChange={setIncludeResponseLink}
+                      />
+                      <Label htmlFor="include-response-link" className="text-sm">
+                        Include response link buttons (Yes/Maybe/No)
+                      </Label>
+                    </div>
+
+                    <Button 
+                      onClick={sendCustomEmail}
+                      disabled={sendingCustomEmail}
+                      className="btn-primary w-full"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      {sendingCustomEmail ? "Sending..." : "Send Custom Email to All Users"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
