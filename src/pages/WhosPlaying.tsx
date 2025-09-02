@@ -244,7 +244,8 @@ const WhosPlaying = () => {
                             🕶️ {user.name} (Not responded)
                           </span>
                         ) : (
-                          user.nickname || user.name
+                          // Show nickname if available, otherwise show name
+                          response?.user_nickname || user.nickname || user.name
                         )}
                       </h3>
                       <p className="text-xs text-muted-foreground">
