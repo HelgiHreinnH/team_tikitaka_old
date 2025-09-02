@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     // Generate a test response token (in real implementation, this would come from database)
     const testToken = 'test-token-' + Date.now()
     const weekDate = 'Wednesday, September 4th, 2025'
-    const baseUrl = 'https://tikitaka.lovableproject.com'
+    const baseUrl = 'https://rifwpmohngsieuyhfjwx.lovableproject.com'
     
     // Render the email template
     const emailHtml = await renderAsync(
