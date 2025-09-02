@@ -160,16 +160,16 @@ const Respond = () => {
                 Are you coming to training on {formatDate(response.week_date)} at 17:30?
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-8">
               {/* Current Status */}
               {hasResponded && (
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-3">Current Response:</p>
-                  <Badge className={`${getStatusColor(response.status)} text-lg px-4 py-2 font-semibold`}>
+                <div className="text-center py-6 border-b border-border">
+                  <p className="text-base font-medium text-foreground mb-4">Current Response:</p>
+                  <Badge className={`${getStatusColor(response.status)} text-xl px-6 py-3 font-bold text-white shadow-lg`}>
                     {getStatusLabel(response.status)}
                   </Badge>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    You can still change your response below
+                  <p className="text-sm text-muted-foreground mt-4 font-medium">
+                    You can change your response below
                   </p>
                 </div>
               )}
