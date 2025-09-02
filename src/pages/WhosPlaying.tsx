@@ -18,14 +18,16 @@ const WhosPlaying = () => {
       const weekDate = formatWeekDate(nextWednesday);
       setCurrentWeek(weekDate);
 
-      // Fetch all users first, then filter responses in memory for proper LEFT JOIN
+      // Fetch only safe public user data (nickname only)
       const { data: usersData, error } = await supabase
-        .from('users')
+        .from('users_public')
         .select(`
-          *,
+          id,
+          nickname,
+          created_at,
           weekly_responses_public!left(*)
         `)
-        .order('name');
+        .order('nickname');
       
       if (error) {
         console.error('Error fetching users:', error);
@@ -66,7 +68,7 @@ const WhosPlaying = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'weekly_responses',
+          table: 'weekly_responses_public',
           filter: `week_date=eq.${getCurrentWeekFilter()}`
         },
         () => {
@@ -167,7 +169,7 @@ const WhosPlaying = () => {
                 <Card key={user.id} className={`${getBorderColor(status)} transition-colors`}>
                   <CardContent className="flex justify-between items-center py-4">
                     <div>
-                      <h3 className="font-semibold">{user.nickname || user.name}</h3>
+                      <h3 className="font-semibold">{user.nickname || 'Player'}</h3>
                       <p className="text-xs text-muted-foreground">
                         {response?.responded_at 
                           ? `Responded ${new Date(response.responded_at).toLocaleDateString()}`

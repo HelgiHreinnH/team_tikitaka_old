@@ -10,6 +10,12 @@ export interface User {
   updated_at: string;
 }
 
+export interface PublicUser {
+  id: string;
+  nickname?: string;
+  created_at: string;
+}
+
 export interface WeeklyResponse {
   id: string;
   user_id: string;
@@ -37,7 +43,7 @@ export interface UserWithResponse extends User {
   weekly_response?: WeeklyResponse;
 }
 
-export interface UserWithPublicResponse extends User {
+export interface UserWithPublicResponse extends PublicUser {
   weekly_responses_public: WeeklyResponsePublic[];
 }
 
