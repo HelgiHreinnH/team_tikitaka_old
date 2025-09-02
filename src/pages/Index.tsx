@@ -31,14 +31,15 @@ const Index = () => {
 
     try {
       // Insert user with nickname fallback logic
-      const displayNickname = nickname.trim() || name.trim();
+      // Send NULL for empty nickname to trigger database assignment
+      const nicknameValue = nickname.trim() || null;
       const { data: userData, error: userError } = await supabase
         .from('users')
         .insert([{ 
           name: name.trim(), 
           email: email.trim(), 
           phone: phone.trim() || null,
-          nickname: displayNickname
+          nickname: nicknameValue
         }])
         .select()
         .single();
@@ -56,18 +57,29 @@ const Index = () => {
         return;
       }
 
-      // Create weekly response for next Wednesday
+      // Don't create weekly response here - let the email system handle it
+      // This prevents race conditions and duplicate entries
+      // But create a minimal entry so user appears in "Who's Playing" immediately
       const nextWednesday = getNextWednesday();
-      const { error: responseError } = await supabase
+      const weekDate = formatWeekDate(nextWednesday);
+      
+      // Check if response already exists for this week
+      const { data: existingResponse } = await supabase
         .from('weekly_responses')
-        .insert([{
-          user_id: userData.id,
-          week_date: formatWeekDate(nextWednesday),
-          status: 'no_response'
-        }]);
-
-      if (responseError) {
-        console.error('Response creation error:', responseError);
+        .select('id')
+        .eq('user_id', userData.id)
+        .eq('week_date', weekDate)
+        .maybeSingle();
+      
+      if (!existingResponse) {
+        // Create entry so user appears in attendance immediately
+        await supabase
+          .from('weekly_responses')
+          .insert([{
+            user_id: userData.id,
+            week_date: weekDate,
+            status: 'no_response'
+          }]);
       }
 
       toast({

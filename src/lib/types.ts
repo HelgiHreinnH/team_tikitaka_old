@@ -21,8 +21,24 @@ export interface WeeklyResponse {
   updated_at: string;
 }
 
+export interface WeeklyResponsePublic {
+  id: string;
+  user_id: string;
+  week_date: string;
+  status: 'yes' | 'maybe' | 'no' | 'no_response';
+  responded_at?: string;
+  created_at: string;
+  updated_at: string;
+  user_name: string;
+  user_nickname?: string;
+}
+
 export interface UserWithResponse extends User {
   weekly_response?: WeeklyResponse;
+}
+
+export interface UserWithPublicResponse extends User {
+  weekly_responses_public: WeeklyResponsePublic[];
 }
 
 export type ResponseStatus = WeeklyResponse['status'];

@@ -33,12 +33,13 @@ Deno.serve(async (req) => {
   try {
     console.log('Starting weekly invite send process...')
     
-    // Get next Wednesday's date
+    // Get next Wednesday's date - using standardized formula
     const now = new Date()
     const nextWednesday = new Date(now)
     
-    // Find next Wednesday
-    const daysUntilWednesday = (3 + 7 - now.getDay()) % 7 || 7
+    // Standardized formula: find next Wednesday (day 3)
+    // If today is Wednesday, get next week's Wednesday
+    const daysUntilWednesday = (3 - now.getDay() + 7) % 7 || 7
     nextWednesday.setDate(now.getDate() + daysUntilWednesday)
     
     // Format the date string
@@ -83,12 +84,16 @@ Deno.serve(async (req) => {
         console.log(`Processing user: ${user.email}`)
         
         // Check if weekly response already exists for this user and week
-        const { data: existingResponse } = await supabase
+        const { data: existingResponse, error: checkError } = await supabase
           .from('weekly_responses')
           .select('id, response_token')
           .eq('user_id', user.id)
           .eq('week_date', weekDateForDB)
           .maybeSingle()
+        
+        if (checkError && checkError.code !== 'PGRST116') {
+          throw new Error(`Error checking existing response for ${user.email}: ${checkError.message}`)
+        }
         
         let responseToken
         
@@ -97,7 +102,7 @@ Deno.serve(async (req) => {
           responseToken = existingResponse.response_token
           console.log(`Using existing response token for ${user.email}`)
         } else {
-          // Create new weekly response record
+          // Create new weekly response record with proper error handling
           const { data: newResponse, error: responseError } = await supabase
             .from('weekly_responses')
             .insert({
@@ -109,15 +114,31 @@ Deno.serve(async (req) => {
             .maybeSingle()
           
           if (responseError) {
-            throw new Error(`Failed to create response for ${user.email}: ${responseError.message}`)
-          }
-          
-          if (!newResponse) {
+            // Handle duplicate key error gracefully (race condition)
+            if (responseError.code === '23505') {
+              console.log(`Response already exists for ${user.email}, retrying...`)
+              // Retry getting the existing token
+              const { data: retryResponse } = await supabase
+                .from('weekly_responses')
+                .select('response_token')
+                .eq('user_id', user.id)
+                .eq('week_date', weekDateForDB)
+                .maybeSingle()
+              
+              if (retryResponse) {
+                responseToken = retryResponse.response_token
+              } else {
+                throw new Error(`Failed to get response token for ${user.email} after retry`)
+              }
+            } else {
+              throw new Error(`Failed to create response for ${user.email}: ${responseError.message}`)
+            }
+          } else if (!newResponse) {
             throw new Error(`Failed to create response for ${user.email}: No response returned`)
+          } else {
+            responseToken = newResponse.response_token
+            console.log(`Created new response token for ${user.email}`)
           }
-          
-          responseToken = newResponse.response_token
-          console.log(`Created new response token for ${user.email}`)
         }
         
         // Use nickname if available, otherwise use name

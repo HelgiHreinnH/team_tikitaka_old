@@ -46,6 +46,8 @@ export function formatDate(dateString: string): string {
 
 export function getNextWednesday(): Date {
   const today = new Date()
+  // Standardized formula: find next Wednesday (day 3)
+  // If today is Wednesday, get next week's Wednesday
   const daysUntilWednesday = (3 - today.getDay() + 7) % 7 || 7
   const nextWednesday = new Date(today)
   nextWednesday.setDate(today.getDate() + daysUntilWednesday)

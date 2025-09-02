@@ -4,15 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, WeeklyResponse, ResponseStatus } from "@/lib/types";
+import { UserWithPublicResponse, ResponseStatus } from "@/lib/types";
 import { getStatusColor, getStatusLabel, getNextWednesday, formatWeekDate, formatDate } from "@/lib/utils";
 
-interface UserWithResponse extends User {
-  weekly_responses_public: WeeklyResponse[];
-}
-
 const WhosPlaying = () => {
-  const [users, setUsers] = useState<UserWithResponse[]>([]);
+  const [users, setUsers] = useState<UserWithPublicResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState<string>("");
 
@@ -22,23 +18,33 @@ const WhosPlaying = () => {
       const weekDate = formatWeekDate(nextWednesday);
       setCurrentWeek(weekDate);
 
-      // Fetch all users and their responses for this week (left join to show all users)
-      const { data, error } = await supabase
+      // Fetch all users first, then filter responses in memory for proper LEFT JOIN
+      const { data: usersData, error } = await supabase
         .from('users')
         .select(`
           *,
-          weekly_responses_public(*)
+          weekly_responses_public!left(*)
         `)
-        .eq('weekly_responses_public.week_date', weekDate)
         .order('name');
-
+      
       if (error) {
-        console.error('Error fetching attendance:', error);
+        console.error('Error fetching users:', error);
         return;
       }
 
-      // Type assertion for Supabase data
-      setUsers((data as any[]) || []);
+      // Filter responses to only show current week's data and ensure proper typing
+      const filteredData = usersData?.map(user => ({
+        ...user,
+        weekly_responses_public: user.weekly_responses_public?.filter(
+          (response: any) => response.week_date === weekDate
+        ).map((response: any) => ({
+          ...response,
+          status: response.status as ResponseStatus || 'no_response'
+        })) || []
+      })) || [];
+
+      // Use the filtered data with proper typing
+      setUsers(filteredData as UserWithPublicResponse[]);
     } catch (error) {
       console.error('Error fetching attendance:', error);
     } finally {
@@ -49,7 +55,10 @@ const WhosPlaying = () => {
   useEffect(() => {
     fetchAttendance();
 
-    // Set up real-time subscription
+    // Set up real-time subscription filtered by current week
+    // Recalculate the week date to handle day transitions
+    const getCurrentWeekFilter = () => formatWeekDate(getNextWednesday());
+    
     const channel = supabase
       .channel('weekly-responses-changes')
       .on(
@@ -57,7 +66,8 @@ const WhosPlaying = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'weekly_responses'
+          table: 'weekly_responses',
+          filter: `week_date=eq.${getCurrentWeekFilter()}`
         },
         () => {
           fetchAttendance();

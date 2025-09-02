@@ -42,7 +42,21 @@ const Respond = () => {
         if (error || !data) {
           setNotFound(true);
         } else {
-          setResponse(data as ResponseData);
+          // Validate token hasn't expired (check if session date is in the past)
+          // Allow same-day sessions by only checking if date is before today
+          const sessionDate = new Date(data.week_date);
+          const today = new Date();
+          
+          // Only reject if session date is fully before today (not same day)
+          sessionDate.setHours(23, 59, 59, 999); // End of session day
+          today.setHours(0, 0, 0, 0); // Start of today
+          
+          if (sessionDate < today) {
+            setNotFound(true);
+            console.log('Token expired - session date is in the past');
+          } else {
+            setResponse(data as ResponseData);
+          }
         }
       } catch (error) {
         console.error('Error fetching response:', error);
@@ -96,16 +110,19 @@ const Respond = () => {
     }
   }, [response]);
 
-  // Auto-process response from URL parameter
+  // Auto-process response from URL parameter - only after data is fully loaded
   useEffect(() => {
-    if (response && !autoProcessed) {
+    if (response && !loading && !autoProcessed) {
       const urlResponse = searchParams.get('response');
       if (urlResponse && ['yes', 'maybe', 'no'].includes(urlResponse)) {
         setAutoProcessed(true);
-        handleResponse(urlResponse as ResponseStatus);
+        // Small delay to ensure state is stable
+        setTimeout(() => {
+          handleResponse(urlResponse as ResponseStatus);
+        }, 100);
       }
     }
-  }, [response, searchParams, autoProcessed, handleResponse]);
+  }, [response, loading, searchParams, autoProcessed, handleResponse]);
 
   if (loading) {
     return (
