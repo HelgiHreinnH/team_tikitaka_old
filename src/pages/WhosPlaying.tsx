@@ -4,30 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ResponseStatus } from "@/lib/types";
+import { User, WeeklyResponse, ResponseStatus } from "@/lib/types";
 import { getStatusColor, getStatusLabel, getNextWednesday, formatWeekDate, formatDate } from "@/lib/utils";
 
-interface PublicUser {
-  id: string;
-  name: string;
-  nickname?: string;
-  created_at: string;
-}
-
-interface PublicResponse {
-  id: string;
-  user_id: string;
-  week_date: string;
-  status: ResponseStatus;
-  responded_at?: string;
-  created_at: string;
-  updated_at: string;
-  user_name: string;
-  user_nickname?: string;
-}
-
-interface UserWithResponse extends PublicUser {
-  weekly_responses_public: PublicResponse[];
+interface UserWithResponse extends User {
+  weekly_responses_public: WeeklyResponse[];
 }
 
 const WhosPlaying = () => {
@@ -41,66 +22,23 @@ const WhosPlaying = () => {
       const weekDate = formatWeekDate(nextWednesday);
       setCurrentWeek(weekDate);
 
-      // Get total registered users count
-      const { count: totalUsers } = await supabase
-        .from('users_public')
-        .select('*', { count: 'exact', head: true });
-
-      // Fetch responses for this week with user data from secure public view
-      const { data: responses, error } = await supabase
-        .from('weekly_responses_public')
-        .select('*')
-        .eq('week_date', weekDate)
-        .order('user_name');
+      // Fetch all users and their responses for this week (left join to show all users)
+      const { data, error } = await supabase
+        .from('users')
+        .select(`
+          *,
+          weekly_responses_public(*)
+        `)
+        .eq('weekly_responses_public.week_date', weekDate)
+        .order('name');
 
       if (error) {
         console.error('Error fetching attendance:', error);
         return;
       }
 
-      // Create user objects - only show identity for those who responded
-      const respondedUsers: UserWithResponse[] = [];
-      const responseCount = responses?.length || 0;
-      const totalCount = totalUsers || 0;
-
-      // Add responded users with their identities
-      responses?.forEach(response => {
-        if (response.status !== 'no_response') {
-          respondedUsers.push({
-            id: response.user_id,
-            name: response.user_name,
-            nickname: response.user_nickname,
-            created_at: response.created_at,
-            weekly_responses_public: [{
-              ...response,
-              status: response.status as ResponseStatus
-            }]
-          });
-        }
-      });
-
-      // Add anonymous entries for non-responders
-      const nonResponderCount = totalCount - responseCount;
-      for (let i = 0; i < nonResponderCount; i++) {
-        respondedUsers.push({
-          id: `anonymous-${i}`,
-          name: `Player ${i + 1}`,
-          nickname: undefined,
-          created_at: '',
-          weekly_responses_public: [{
-            id: `no-response-${i}`,
-            user_id: `anonymous-${i}`,
-            week_date: weekDate,
-            status: 'no_response',
-            created_at: '',
-            updated_at: '',
-            user_name: `Player ${i + 1}`,
-            user_nickname: undefined
-          }]
-        });
-      }
-
-      setUsers(respondedUsers);
+      // Type assertion for Supabase data
+      setUsers((data as any[]) || []);
     } catch (error) {
       console.error('Error fetching attendance:', error);
     } finally {
@@ -111,21 +49,21 @@ const WhosPlaying = () => {
   useEffect(() => {
     fetchAttendance();
 
-        // Set up real-time subscription for weekly responses changes
-        const channel = supabase
-          .channel('weekly-responses-changes')
-          .on(
-            'postgres_changes',
-            {
-              event: '*',
-              schema: 'public',
-              table: 'weekly_responses'
-            },
-            () => {
-              fetchAttendance();
-            }
-          )
-          .subscribe();
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('weekly-responses-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'weekly_responses'
+        },
+        () => {
+          fetchAttendance();
+        }
+      )
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -159,13 +97,6 @@ const WhosPlaying = () => {
     !user.weekly_responses_public?.[0] || user.weekly_responses_public[0]?.status === 'no_response'
   ).length;
 
-  const respondedCount = users.filter(user => 
-    user.weekly_responses_public?.[0]?.status !== 'no_response' && 
-    !user.id.startsWith('anonymous-')
-  ).length;
-
-  const totalRegistered = users.length;
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -175,17 +106,6 @@ const WhosPlaying = () => {
           <p className="text-muted-foreground mb-4">
             {formatDate(currentWeek)} at 17:30
           </p>
-          
-          {/* Stats Summary */}
-          <div className="mb-6 p-4 bg-muted/30 rounded-lg border">
-            <p className="text-sm text-muted-foreground mb-2">
-              👥 <strong>{totalRegistered}</strong> total registered players
-            </p>
-            <p className="text-sm text-muted-foreground">
-              📝 <strong>{respondedCount}</strong> have responded • <strong>{noResponseCount}</strong> pending
-            </p>
-          </div>
-
           <div className="flex justify-center gap-4 flex-wrap">
             <Badge variant="secondary" className="status-yes">
               ✅ Playing: {playingCount}
@@ -217,7 +137,6 @@ const WhosPlaying = () => {
             users.map((user) => {
               const response = user.weekly_responses_public?.[0];
               const status = (response?.status as ResponseStatus) || 'no_response';
-              const isAnonymous = user.id.startsWith('anonymous-');
               
               // Get border color class based on status
               const getBorderColor = (status: ResponseStatus): string => {
@@ -235,27 +154,15 @@ const WhosPlaying = () => {
               };
               
               return (
-                <Card key={user.id} className={`${getBorderColor(status)} transition-colors ${isAnonymous ? 'opacity-60' : ''}`}>
+                <Card key={user.id} className={`${getBorderColor(status)} transition-colors`}>
                   <CardContent className="flex justify-between items-center py-4">
                     <div>
-                      <h3 className="font-semibold">
-                        {isAnonymous ? (
-                          <span className="text-muted-foreground">
-                            🕶️ {user.name} (Not responded)
-                          </span>
-                        ) : (
-                          // Show nickname if available, otherwise show name
-                          response?.user_nickname || user.nickname || user.name
-                        )}
-                      </h3>
+                      <h3 className="font-semibold">{user.nickname || user.name}</h3>
                       <p className="text-xs text-muted-foreground">
-                        {isAnonymous ? (
-                          'Awaiting response...'
-                        ) : response?.responded_at ? (
-                          `Responded ${new Date(response.responded_at).toLocaleDateString()}`
-                        ) : (
-                          'Response pending'
-                        )}
+                        {response?.responded_at 
+                          ? `Responded ${new Date(response.responded_at).toLocaleDateString()}`
+                          : 'No response yet'
+                        }
                       </p>
                     </div>
                     <Badge className={getStatusColor(status)}>
