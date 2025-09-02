@@ -210,6 +210,14 @@ const Respond = () => {
                   <p className="text-sm text-muted-foreground mt-2">Saving response...</p>
                 </div>
               )}
+
+              {/* Helpful Info */}
+              <div className="mt-6 p-3 bg-muted/30 rounded-lg border">
+                <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                  💡 <strong>Tip:</strong> You can always access this page by clicking the link in your weekly email, 
+                  or bookmark this page to quickly update your response anytime.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
