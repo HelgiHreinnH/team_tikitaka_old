@@ -59,18 +59,19 @@ serve(async (req) => {
 
     console.log(`Processing correction emails for week: ${weekDate}`);
 
-    // Fetch all users
+    // Fetch specific admin user
     const { data: users, error: usersError } = await supabase
       .from('users')
-      .select('*');
+      .select('*')
+      .eq('email', 'helgihreinn@me.com');
 
     if (usersError) {
-      throw new Error(`Error fetching users: ${usersError.message}`);
+      throw new Error(`Error fetching admin user: ${usersError.message}`);
     }
 
     if (!users || users.length === 0) {
       return new Response(
-        JSON.stringify({ message: 'No users found' }),
+        JSON.stringify({ message: 'Admin user not found' }),
         { 
           status: 200, 
           headers: { 
@@ -81,7 +82,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Found ${users.length} users to process`);
+    console.log(`Found admin user to process`);
 
     let successCount = 0;
     let errorCount = 0;

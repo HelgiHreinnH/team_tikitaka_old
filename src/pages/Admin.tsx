@@ -285,7 +285,7 @@ const Admin = () => {
                     className="w-full"
                   >
                     <Mail className="h-4 w-4 mr-2" />
-                    {sendingCorrection ? "Sending..." : "Send Correction Email to All Users"}
+                    {sendingCorrection ? "Sending..." : "Send Correction Mail to Admin"}
                   </Button>
                 </div>
               </div>
