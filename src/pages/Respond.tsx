@@ -179,8 +179,8 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('yes')}
                   disabled={submitting}
-                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-base"
-                  variant={response.status === 'yes' ? 'default' : 'outline'}
+                  className="w-full h-12 text-base font-semibold response-button-yes"
+                  variant="default"
                 >
                   ✅ YES - I'm playing
                 </Button>
@@ -188,8 +188,8 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('maybe')}
                   disabled={submitting}
-                  className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black text-base"
-                  variant={response.status === 'maybe' ? 'default' : 'outline'}
+                  className="w-full h-12 text-base font-semibold response-button-maybe"
+                  variant="default"
                 >
                   🤔 MAYBE - Not sure yet
                 </Button>
@@ -197,8 +197,8 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('no')}
                   disabled={submitting}
-                  className="w-full h-12 bg-red-600 hover:bg-red-700 text-white text-base"
-                  variant={response.status === 'no' ? 'default' : 'outline'}
+                  className="w-full h-12 text-base font-semibold response-button-no"
+                  variant="default"
                 >
                   ❌ NO - Can't make it
                 </Button>

@@ -187,7 +187,7 @@ const buttonColumn = {
 }
 
 const yesButton = {
-  backgroundColor: '#10b981',
+  backgroundColor: '#16a34a', // green-600 to match status-yes
   borderRadius: '8px',
   color: '#ffffff',
   display: 'block',
@@ -203,9 +203,9 @@ const yesButton = {
 }
 
 const maybeButton = {
-  backgroundColor: '#f59e0b',
+  backgroundColor: '#eab308', // yellow-500 to match status-maybe
   borderRadius: '8px',
-  color: '#ffffff',
+  color: '#000000', // black text to match status-maybe
   display: 'block',
   fontFamily: "'Inter', sans-serif",
   fontSize: '14px',
@@ -219,7 +219,7 @@ const maybeButton = {
 }
 
 const noButton = {
-  backgroundColor: '#ef4444',
+  backgroundColor: '#dc2626', // red-600 to match status-no
   borderRadius: '8px',
   color: '#ffffff',
   display: 'block',
