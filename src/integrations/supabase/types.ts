@@ -87,7 +87,44 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      weekly_responses_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          responded_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+          week_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          responded_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          week_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          responded_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          week_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

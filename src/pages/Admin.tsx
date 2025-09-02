@@ -91,7 +91,7 @@ const Admin = () => {
       // Test weekly responses table
       console.log("Testing weekly responses table...");
       const { data: responsesData, error: responsesError } = await supabase
-        .from('weekly_responses')
+        .from('weekly_responses_public')
         .select('count', { count: 'exact', head: true });
       
       results.push({
@@ -131,7 +131,7 @@ const Admin = () => {
       const weekDate = wednesday.toISOString().split('T')[0];
       
       const { data: weekData, error: weekError } = await supabase
-        .from('weekly_responses')
+        .from('weekly_responses_public')
         .select('*')
         .eq('week_date', weekDate);
       

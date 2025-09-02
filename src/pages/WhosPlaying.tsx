@@ -8,7 +8,7 @@ import { User, WeeklyResponse, ResponseStatus } from "@/lib/types";
 import { getStatusColor, getStatusLabel, getNextWednesday, formatWeekDate, formatDate } from "@/lib/utils";
 
 interface UserWithResponse extends User {
-  weekly_responses: WeeklyResponse[];
+  weekly_responses_public: WeeklyResponse[];
 }
 
 const WhosPlaying = () => {
@@ -27,9 +27,9 @@ const WhosPlaying = () => {
         .from('users')
         .select(`
           *,
-          weekly_responses(*)
+          weekly_responses_public(*)
         `)
-        .eq('weekly_responses.week_date', weekDate)
+        .eq('weekly_responses_public.week_date', weekDate)
         .order('name');
 
       if (error) {
@@ -82,19 +82,19 @@ const WhosPlaying = () => {
   }
 
   const playingCount = users.filter(user => 
-    user.weekly_responses?.[0]?.status === 'yes'
+    user.weekly_responses_public?.[0]?.status === 'yes'
   ).length;
 
   const maybeCount = users.filter(user => 
-    user.weekly_responses?.[0]?.status === 'maybe'
+    user.weekly_responses_public?.[0]?.status === 'maybe'
   ).length;
 
   const notPlayingCount = users.filter(user => 
-    user.weekly_responses?.[0]?.status === 'no'
+    user.weekly_responses_public?.[0]?.status === 'no'
   ).length;
 
   const noResponseCount = users.filter(user => 
-    !user.weekly_responses?.[0] || user.weekly_responses[0]?.status === 'no_response'
+    !user.weekly_responses_public?.[0] || user.weekly_responses_public[0]?.status === 'no_response'
   ).length;
 
   return (
@@ -135,7 +135,7 @@ const WhosPlaying = () => {
             </Card>
           ) : (
             users.map((user) => {
-              const response = user.weekly_responses?.[0];
+              const response = user.weekly_responses_public?.[0];
               const status = (response?.status as ResponseStatus) || 'no_response';
               
               // Get border color class based on status
