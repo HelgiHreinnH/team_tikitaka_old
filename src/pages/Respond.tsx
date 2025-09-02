@@ -164,11 +164,11 @@ const Respond = () => {
               {/* Current Status */}
               {hasResponded && (
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">Current Response:</p>
-                  <Badge className={getStatusColor(response.status)}>
+                  <p className="text-sm text-muted-foreground mb-3">Current Response:</p>
+                  <Badge className={`${getStatusColor(response.status)} text-lg px-4 py-2 font-semibold`}>
                     {getStatusLabel(response.status)}
                   </Badge>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground mt-3">
                     You can still change your response below
                   </p>
                 </div>
@@ -179,7 +179,7 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('yes')}
                   disabled={submitting}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-base"
                   variant={response.status === 'yes' ? 'default' : 'outline'}
                 >
                   ✅ YES - I'm playing
@@ -188,7 +188,7 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('maybe')}
                   disabled={submitting}
-                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-black"
+                  className="w-full h-12 bg-yellow-500 hover:bg-yellow-600 text-black text-base"
                   variant={response.status === 'maybe' ? 'default' : 'outline'}
                 >
                   🤔 MAYBE - Not sure yet
@@ -197,7 +197,7 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('no')}
                   disabled={submitting}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  className="w-full h-12 bg-red-600 hover:bg-red-700 text-white text-base"
                   variant={response.status === 'no' ? 'default' : 'outline'}
                 >
                   ❌ NO - Can't make it
@@ -215,13 +215,13 @@ const Respond = () => {
 
           {/* Footer Links */}
           <div className="text-center mt-8 space-y-4">
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="w-full h-10">
               <a href="/whos-playing">See Who's Playing</a>
             </Button>
             
             <div>
-              <Button variant="ghost" asChild>
-                <a href="/" className="text-sm">Back to Home</a>
+              <Button variant="ghost" asChild className="w-full h-10 text-sm">
+                <a href="/">Back to Home</a>
               </Button>
             </div>
           </div>
