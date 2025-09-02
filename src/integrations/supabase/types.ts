@@ -83,10 +83,38 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "weekly_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
+      users_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          name: string | null
+          nickname: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          name?: string | null
+          nickname?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          name?: string | null
+          nickname?: string | null
+        }
+        Relationships: []
+      }
       weekly_responses_public: {
         Row: {
           created_at: string | null
@@ -95,25 +123,9 @@ export type Database = {
           status: string | null
           updated_at: string | null
           user_id: string | null
+          user_name: string | null
+          user_nickname: string | null
           week_date: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          responded_at?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          week_date?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          responded_at?: string | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          week_date?: string | null
         }
         Relationships: [
           {
@@ -121,6 +133,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_responses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_public"
             referencedColumns: ["id"]
           },
         ]
