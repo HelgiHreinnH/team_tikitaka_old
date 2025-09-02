@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,10 +14,12 @@ interface ResponseData extends WeeklyResponse {
 
 const Respond = () => {
   const { token } = useParams<{ token: string }>();
+  const [searchParams] = useSearchParams();
   const [response, setResponse] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [autoProcessed, setAutoProcessed] = useState(false);
 
   useEffect(() => {
     const fetchResponse = async () => {
@@ -53,7 +55,7 @@ const Respond = () => {
     fetchResponse();
   }, [token]);
 
-  const handleResponse = async (status: ResponseStatus) => {
+  const handleResponse = useCallback(async (status: ResponseStatus) => {
     if (!response) return;
 
     setSubmitting(true);
@@ -92,7 +94,18 @@ const Respond = () => {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [response]);
+
+  // Auto-process response from URL parameter
+  useEffect(() => {
+    if (response && !autoProcessed) {
+      const urlResponse = searchParams.get('response');
+      if (urlResponse && ['yes', 'maybe', 'no'].includes(urlResponse)) {
+        setAutoProcessed(true);
+        handleResponse(urlResponse as ResponseStatus);
+      }
+    }
+  }, [response, searchParams, autoProcessed, handleResponse]);
 
   if (loading) {
     return (
