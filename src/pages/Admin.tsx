@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-import { ArrowLeft, FileText, CheckCircle, AlertCircle, Activity } from "lucide-react";
+import { ArrowLeft, FileText, CheckCircle, AlertCircle, Activity, Mail, BarChart3 } from "lucide-react";
 
 const Admin = () => {
   const [sendingCorrection, setSendingCorrection] = useState(false);
@@ -14,6 +14,8 @@ const Admin = () => {
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [diagnosticsRunning, setDiagnosticsRunning] = useState(false);
   const [diagnosticsResults, setDiagnosticsResults] = useState<any[]>([]);
+  const [resendDiagnosticsRunning, setResendDiagnosticsRunning] = useState(false);
+  const [resendData, setResendData] = useState<any>(null);
 
   const sendCorrectionEmail = async () => {
     setSendingCorrection(true);
@@ -162,6 +164,40 @@ const Admin = () => {
     });
   };
 
+  const getResendDiagnostics = async () => {
+    setResendDiagnosticsRunning(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('resend-diagnostics');
+      
+      if (error) {
+        throw error;
+      }
+      
+      setResendData(data.data);
+      
+      toast({
+        title: "Resend Diagnostics Retrieved",
+        description: `Found ${data.data.emailStats.total} total emails, ${data.data.todaysEmails} sent today`,
+      });
+
+      // Add to logs
+      const logEntry = `${new Date().toISOString()}: Resend diagnostics retrieved - ${data.data.emailStats.total} total emails, ${data.data.todaysEmails} today`;
+      setLogs(prev => [logEntry, ...prev]);
+    } catch (error) {
+      console.error('Error getting Resend diagnostics:', error);
+      const logEntry = `${new Date().toISOString()}: ERROR getting Resend diagnostics - ${error.message}`;
+      setLogs(prev => [logEntry, ...prev]);
+      
+      toast({
+        title: "Error",
+        description: "Failed to get Resend diagnostics. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setResendDiagnosticsRunning(false);
+    }
+  };
+
   const currentLog = logs.length > 0 ? logs[0] : "No recent activity";
 
   return (
@@ -248,8 +284,111 @@ const Admin = () => {
                     disabled={sendingCorrection}
                     className="w-full"
                   >
+                    <Mail className="h-4 w-4 mr-2" />
                     {sendingCorrection ? "Sending..." : "Send Correction Email to All Users"}
                   </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Resend Diagnostics */}
+          <Card>
+            <CardHeader>
+              <CardTitle>📊 Resend Email Diagnostics</CardTitle>
+              <CardDescription>
+                View Resend service statistics and email delivery information
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg bg-muted/50">
+                  <h4 className="font-semibold mb-2">Email Service Analytics</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Get detailed statistics about email delivery, domains, and recent activity from Resend.
+                  </p>
+                  <Button 
+                    onClick={getResendDiagnostics}
+                    disabled={resendDiagnosticsRunning}
+                    className="w-full mb-4"
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    {resendDiagnosticsRunning ? "Fetching Data..." : "Get Resend Diagnostics"}
+                  </Button>
+                  
+                  {resendData && (
+                    <div className="space-y-4">
+                      {/* Email Statistics */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="p-3 border rounded-lg bg-background">
+                          <div className="text-sm font-semibold">Total Emails</div>
+                          <div className="text-2xl font-bold text-primary">{resendData.emailStats.total}</div>
+                        </div>
+                        <div className="p-3 border rounded-lg bg-background">
+                          <div className="text-sm font-semibold">Sent</div>
+                          <div className="text-2xl font-bold text-green-500">{resendData.emailStats.sent}</div>
+                        </div>
+                        <div className="p-3 border rounded-lg bg-background">
+                          <div className="text-sm font-semibold">Delivered</div>
+                          <div className="text-2xl font-bold text-blue-500">{resendData.emailStats.delivered}</div>
+                        </div>
+                        <div className="p-3 border rounded-lg bg-background">
+                          <div className="text-sm font-semibold">Today</div>
+                          <div className="text-2xl font-bold text-purple-500">{resendData.todaysEmails}</div>
+                        </div>
+                      </div>
+
+                      {/* Domains */}
+                      {resendData.domains && resendData.domains.length > 0 && (
+                        <div className="p-4 border rounded-lg bg-background">
+                          <h5 className="font-semibold mb-2">Configured Domains</h5>
+                          <div className="space-y-2">
+                            {resendData.domains.map((domain: any, index: number) => (
+                              <div key={index} className="flex items-center justify-between text-sm">
+                                <span>{domain.name}</span>
+                                <span className={`px-2 py-1 rounded text-xs ${
+                                  domain.status === 'verified' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                  {domain.status}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Recent Emails */}
+                      {resendData.recentEmails && resendData.recentEmails.length > 0 && (
+                        <div className="p-4 border rounded-lg bg-background">
+                          <h5 className="font-semibold mb-2">Recent Emails</h5>
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {resendData.recentEmails.map((email: any, index: number) => (
+                              <div key={index} className="flex items-center justify-between text-sm p-2 border rounded">
+                                <div className="flex-1">
+                                  <div className="font-medium">{email.subject}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    To: {Array.isArray(email.to) ? email.to.join(', ') : email.to}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className={`px-2 py-1 rounded text-xs ${
+                                    email.status === 'sent' ? 'bg-green-100 text-green-700' : 
+                                    email.status === 'delivered' ? 'bg-blue-100 text-blue-700' :
+                                    'bg-gray-100 text-gray-700'
+                                  }`}>
+                                    {email.status}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {new Date(email.created_at).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
