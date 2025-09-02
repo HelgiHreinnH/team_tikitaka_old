@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
           .select('id, response_token')
           .eq('user_id', user.id)
           .eq('week_date', weekDateForDB)
-          .single()
+          .maybeSingle()
         
         let responseToken
         
@@ -106,10 +106,14 @@ Deno.serve(async (req) => {
               status: 'no_response'
             })
             .select('response_token')
-            .single()
+            .maybeSingle()
           
           if (responseError) {
             throw new Error(`Failed to create response for ${user.email}: ${responseError.message}`)
+          }
+          
+          if (!newResponse) {
+            throw new Error(`Failed to create response for ${user.email}: No response returned`)
           }
           
           responseToken = newResponse.response_token
