@@ -37,7 +37,7 @@ serve(async (req) => {
   }
 
   try {
-    const baseUrl = "https://tikitaka.designingforusers.com";
+    const baseUrl = "https://tikitaka.lovableproject.com";
     
     // Calculate next Wednesday
     const today = new Date();
@@ -95,7 +95,7 @@ serve(async (req) => {
           .select('response_token')
           .eq('user_id', user.id)
           .eq('week_date', weekDate)
-          .single();
+          .maybeSingle();
 
         if (!existingResponse) {
           console.log(`No existing response found for user ${user.name}, skipping`);

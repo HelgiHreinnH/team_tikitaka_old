@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     console.log(`Found ${users.length} users to send invites to`)
     
     const results = []
-    const baseUrl = 'https://tikitaka.desiningforusers.com'
+    const baseUrl = 'https://tikitaka.lovableproject.com'
     
     // Process each user
     for (const user of users) {

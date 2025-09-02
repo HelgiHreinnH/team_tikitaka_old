@@ -37,7 +37,7 @@ const Respond = () => {
             users (*)
           `)
           .eq('response_token', token)
-          .single();
+          .maybeSingle();
 
         if (error || !data) {
           setNotFound(true);
