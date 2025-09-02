@@ -179,7 +179,7 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('yes')}
                   disabled={submitting}
-                  className="w-full h-12 text-base font-semibold response-button-yes"
+                  className="response-btn-yes"
                   variant="default"
                 >
                   ✅ YES - I'm playing
@@ -188,7 +188,7 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('maybe')}
                   disabled={submitting}
-                  className="w-full h-12 text-base font-semibold response-button-maybe"
+                  className="response-btn-maybe"
                   variant="default"
                 >
                   🤔 MAYBE - Not sure yet
@@ -197,7 +197,7 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('no')}
                   disabled={submitting}
-                  className="w-full h-12 text-base font-semibold response-button-no"
+                  className="response-btn-no"
                   variant="default"
                 >
                   ❌ NO - Can't make it
@@ -223,12 +223,12 @@ const Respond = () => {
 
           {/* Footer Links */}
           <div className="text-center mt-8 space-y-4">
-            <Button variant="outline" asChild className="w-full h-10">
+            <Button variant="outline" asChild className="btn-secondary">
               <a href="/whos-playing">See Who's Playing</a>
             </Button>
             
             <div>
-              <Button variant="ghost" asChild className="w-full h-10 text-sm">
+              <Button variant="ghost" asChild className="btn-secondary">
                 <a href="/">Back to Home</a>
               </Button>
             </div>

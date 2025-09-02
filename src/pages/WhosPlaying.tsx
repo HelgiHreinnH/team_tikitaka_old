@@ -128,7 +128,7 @@ const WhosPlaying = () => {
             <Card>
               <CardContent className="text-center py-8">
                 <p className="text-muted-foreground">No players registered yet.</p>
-                <Button asChild className="mt-4">
+                <Button asChild className="btn-secondary mt-4">
                   <Link to="/">Join the Team</Link>
                 </Button>
               </CardContent>
@@ -177,7 +177,7 @@ const WhosPlaying = () => {
 
         {/* Back to Home */}
         <div className="text-center mt-16">
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="btn-secondary">
             <Link to="/">← Back to Home</Link>
           </Button>
         </div>

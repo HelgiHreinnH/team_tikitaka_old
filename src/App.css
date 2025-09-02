@@ -1,13 +1,35 @@
-/* Hide Lovable branding elements */
+/* Hide Lovable branding elements - comprehensive selectors */
 [data-lovable-badge],
 .lovable-badge,
 .edit-with-lovable,
 [data-testid*="lovable"],
 [class*="lovable-brand"],
-[id*="lovable-badge"] {
+[id*="lovable-badge"],
+[class*="lovable"],
+[id*="lovable"],
+iframe[src*="lovable"],
+div[class*="fixed"][class*="bottom"][class*="right"],
+button[class*="fixed"][class*="bottom"],
+a[href*="lovable"],
+[data-qa*="lovable"],
+.lovable-edit-button,
+#lovable-floating-button,
+.floating-edit-button {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Force hide any floating elements in bottom corners */
+div[style*="position: fixed"][style*="bottom"][style*="right"],
+div[style*="position:fixed"][style*="bottom"][style*="right"] {
+  display: none !important;
 }
 
 #root {

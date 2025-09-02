@@ -196,7 +196,7 @@ const Index = () => {
                             <TooltipTrigger asChild>
                               <Button 
                                 type="submit" 
-                                className="w-auto"
+                                className="btn-secondary"
                                 disabled={isSubmitting}
                               >
                                 {isSubmitting ? "Registering..." : "Join Tiki Taka"}
@@ -271,7 +271,7 @@ const Index = () => {
         {/* Quick Links */}
         <div className="text-center mt-8 space-y-4">
           <div className="flex justify-center gap-4">
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="btn-secondary">
               <Link to="/whos-playing">See who's joining next session</Link>
             </Button>
           </div>

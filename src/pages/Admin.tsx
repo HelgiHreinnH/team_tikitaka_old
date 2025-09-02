@@ -233,8 +233,7 @@ const Admin = () => {
                   <Button 
                     onClick={runDiagnostics}
                     disabled={diagnosticsRunning}
-                    className="w-full mb-4 text-sm"
-                    size="sm"
+                    className="btn-primary"
                   >
                     <Activity className="h-4 w-4 mr-2" />
                     {diagnosticsRunning ? "Running Diagnostics..." : "Run System Diagnostics"}
@@ -283,8 +282,7 @@ const Admin = () => {
                   <Button 
                     onClick={sendCorrectionEmail}
                     disabled={sendingCorrection}
-                    className="w-full text-sm"
-                    size="sm"
+                    className="btn-primary"
                   >
                     <Mail className="h-4 w-4 mr-2" />
                     {sendingCorrection ? "Sending..." : "Send Correction Mail to Admin"}
@@ -312,8 +310,7 @@ const Admin = () => {
                   <Button 
                     onClick={getResendDiagnostics}
                     disabled={resendDiagnosticsRunning}
-                    className="w-full mb-4 text-sm"
-                    size="sm"
+                    className="btn-primary mb-4"
                   >
                     <BarChart3 className="h-4 w-4 mr-2" />
                     {resendDiagnosticsRunning ? "Fetching Data..." : "Get Resend Diagnostics"}
