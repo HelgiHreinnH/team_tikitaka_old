@@ -138,11 +138,32 @@ const WhosPlaying = () => {
               const response = user.weekly_responses?.[0];
               const status = (response?.status as ResponseStatus) || 'no_response';
               
+              // Get border color class based on status
+              const getBorderColor = (status: ResponseStatus): string => {
+                switch (status) {
+                  case 'yes':
+                    return 'border-l-4 border-l-green-600';
+                  case 'maybe':
+                    return 'border-l-4 border-l-yellow-500';
+                  case 'no':
+                    return 'border-l-4 border-l-red-600';
+                  case 'no_response':
+                  default:
+                    return 'border-l-4 border-l-muted';
+                }
+              };
+              
               return (
-                <Card key={user.id}>
+                <Card key={user.id} className={`${getBorderColor(status)} transition-colors`}>
                   <CardContent className="flex justify-between items-center py-4">
                     <div>
                       <h3 className="font-semibold">{user.nickname || user.name}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {response?.responded_at 
+                          ? `Responded ${new Date(response.responded_at).toLocaleDateString()}`
+                          : 'No response yet'
+                        }
+                      </p>
                     </div>
                     <Badge className={getStatusColor(status)}>
                       {getStatusLabel(status)}
