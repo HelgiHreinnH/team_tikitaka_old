@@ -37,7 +37,7 @@ serve(async (req) => {
   }
 
   try {
-    const baseUrl = "https://rifwpmohngsieuyhfjwx.lovableproject.com";
+    const baseUrl = "https://tikitaka.designingforusers.com";
     
     // Calculate next Wednesday
     const today = new Date();
