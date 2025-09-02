@@ -108,16 +108,16 @@ const WhosPlaying = () => {
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             <Badge variant="secondary" className="status-yes">
-              Playing: {playingCount}
+              ✅ Playing: {playingCount}
             </Badge>
             <Badge variant="secondary" className="status-maybe">
-              Maybe: {maybeCount}
+              🤔 Maybe: {maybeCount}
             </Badge>
             <Badge variant="secondary" className="status-no">
-              Not Playing: {notPlayingCount}
+              ❌ Not Playing: {notPlayingCount}
             </Badge>
             <Badge variant="secondary" className="status-no_response">
-              No Response: {noResponseCount}
+              ⚪ No Response: {noResponseCount}
             </Badge>
           </div>
         </div>
