@@ -4,11 +4,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, WeeklyResponse, ResponseStatus } from "@/lib/types";
+import { ResponseStatus } from "@/lib/types";
 import { getStatusColor, getStatusLabel, getNextWednesday, formatWeekDate, formatDate } from "@/lib/utils";
 
-interface UserWithResponse extends User {
-  weekly_responses_public: WeeklyResponse[];
+interface PublicUser {
+  id: string;
+  name: string;
+  nickname?: string;
+  created_at: string;
+}
+
+interface PublicResponse {
+  id: string;
+  user_id: string;
+  week_date: string;
+  status: ResponseStatus;
+  responded_at?: string;
+  created_at: string;
+  updated_at: string;
+  user_name: string;
+  user_nickname?: string;
+}
+
+interface UserWithResponse extends PublicUser {
+  weekly_responses_public: PublicResponse[];
 }
 
 const WhosPlaying = () => {
@@ -22,23 +41,49 @@ const WhosPlaying = () => {
       const weekDate = formatWeekDate(nextWednesday);
       setCurrentWeek(weekDate);
 
-      // Fetch all users and their responses for this week (left join to show all users)
+      // Fetch responses for this week with user data from secure public view
       const { data, error } = await supabase
-        .from('users')
-        .select(`
-          *,
-          weekly_responses_public(*)
-        `)
-        .eq('weekly_responses_public.week_date', weekDate)
-        .order('name');
+        .from('weekly_responses_public')
+        .select('*')
+        .eq('week_date', weekDate)
+        .order('user_name');
 
       if (error) {
         console.error('Error fetching attendance:', error);
         return;
       }
 
-      // Type assertion for Supabase data
-      setUsers((data as any[]) || []);
+      // Transform the data to match the expected interface
+      const userMap = new Map<string, UserWithResponse>();
+      
+      // First, get all users to ensure we show everyone, even those without responses
+      const { data: allUsers, error: usersError } = await supabase
+        .from('users_public')
+        .select('*')
+        .order('name');
+
+      if (usersError) {
+        console.error('Error fetching users:', error);
+        return;
+      }
+
+      // Initialize all users
+      allUsers?.forEach(user => {
+        userMap.set(user.id, {
+          ...user,
+          weekly_responses_public: []
+        });
+      });
+
+      // Add responses to users
+      data?.forEach(response => {
+        const user = userMap.get(response.user_id);
+        if (user) {
+          user.weekly_responses_public.push(response as any);
+        }
+      });
+
+      setUsers(Array.from(userMap.values()));
     } catch (error) {
       console.error('Error fetching attendance:', error);
     } finally {
@@ -49,21 +94,21 @@ const WhosPlaying = () => {
   useEffect(() => {
     fetchAttendance();
 
-    // Set up real-time subscription
-    const channel = supabase
-      .channel('weekly-responses-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'weekly_responses'
-        },
-        () => {
-          fetchAttendance();
-        }
-      )
-      .subscribe();
+        // Set up real-time subscription for weekly responses changes
+        const channel = supabase
+          .channel('weekly-responses-changes')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'weekly_responses'
+            },
+            () => {
+              fetchAttendance();
+            }
+          )
+          .subscribe();
 
     return () => {
       supabase.removeChannel(channel);

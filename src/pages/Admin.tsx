@@ -78,7 +78,7 @@ const Admin = () => {
       // Test database connection
       console.log("Testing database connection...");
       const { data: usersData, error: usersError } = await supabase
-        .from('users')
+        .from('users_public')
         .select('count', { count: 'exact', head: true });
       
       results.push({
