@@ -15,7 +15,6 @@ const Index = () => {
   const [phone, setPhone] = useState("");
   const [nickname, setNickname] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sendingCorrection, setSendingCorrection] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,30 +93,6 @@ const Index = () => {
     }
   };
 
-  const sendCorrectionEmail = async () => {
-    setSendingCorrection(true);
-    try {
-      const { error } = await supabase.functions.invoke('send-correction-email');
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: "Correction emails sent! 📧",
-        description: "All users have been notified about the email fix.",
-      });
-    } catch (error) {
-      console.error('Error sending correction emails:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send correction emails. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setSendingCorrection(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -302,36 +277,21 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Send Correction Email */}
-        <div className="max-w-md mx-auto mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Send Correction Email</CardTitle>
-              <CardDescription>
-                Send a corrective email to all users explaining the email link fix
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button 
-                onClick={sendCorrectionEmail}
-                disabled={sendingCorrection}
-                className="w-full"
-                variant="outline"
-              >
-                {sendingCorrection ? "Sending..." : "Send Correction Email"}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Footer */}
-        <footer className="text-center mt-16 py-8">
+        <footer className="text-center mt-16 py-8 relative">
           <p className="text-xs text-muted-foreground">
             Weekly training sessions every Wednesday at 17:30
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             Kunststofbanen, Arsenalvej 2, København
           </p>
+          <Link 
+            to="/admin" 
+            className="absolute bottom-8 right-4 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+          >
+            admin
+          </Link>
         </footer>
       </div>
     </div>
