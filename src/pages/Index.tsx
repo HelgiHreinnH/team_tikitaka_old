@@ -15,6 +15,7 @@ const Index = () => {
   const [phone, setPhone] = useState("");
   const [nickname, setNickname] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sendingCorrection, setSendingCorrection] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +91,31 @@ const Index = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const sendCorrectionEmail = async () => {
+    setSendingCorrection(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-correction-email');
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Correction emails sent! 📧",
+        description: "All users have been notified about the email fix.",
+      });
+    } catch (error) {
+      console.error('Error sending correction emails:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send correction emails. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingCorrection(false);
     }
   };
 
@@ -274,6 +300,28 @@ const Index = () => {
               <Link to="/whos-playing">See who's joining next session</Link>
             </Button>
           </div>
+        </div>
+
+        {/* Send Correction Email */}
+        <div className="max-w-md mx-auto mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Send Correction Email</CardTitle>
+              <CardDescription>
+                Send a corrective email to all users explaining the email link fix
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={sendCorrectionEmail}
+                disabled={sendingCorrection}
+                className="w-full"
+                variant="outline"
+              >
+                {sendingCorrection ? "Sending..." : "Send Correction Email"}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Footer */}
