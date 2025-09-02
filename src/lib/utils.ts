@@ -23,14 +23,14 @@ export function getStatusColor(status: ResponseStatus): string {
 export function getStatusLabel(status: ResponseStatus): string {
   switch (status) {
     case 'yes':
-      return 'Playing'
+      return '✅ Playing'
     case 'maybe':
-      return 'Maybe'
+      return '🤔 Maybe'
     case 'no':
-      return 'Not Playing'
+      return '❌ Not Playing'
     case 'no_response':
     default:
-      return 'No Response'
+      return '⚪ No Response'
   }
 }
 

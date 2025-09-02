@@ -175,11 +175,11 @@ const Respond = () => {
               )}
 
               {/* Response Buttons */}
-              <div className="space-y-3">
+              <div className="flex flex-col items-center space-y-3">
                 <Button
                   onClick={() => handleResponse('yes')}
                   disabled={submitting}
-                  className="response-btn-yes"
+                  className="response-btn-yes w-80 max-w-full"
                   variant="default"
                 >
                   ✅ YES - I'm playing
@@ -188,7 +188,7 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('maybe')}
                   disabled={submitting}
-                  className="response-btn-maybe"
+                  className="response-btn-maybe w-80 max-w-full"
                   variant="default"
                 >
                   🤔 MAYBE - Not sure yet
@@ -197,7 +197,7 @@ const Respond = () => {
                 <Button
                   onClick={() => handleResponse('no')}
                   disabled={submitting}
-                  className="response-btn-no"
+                  className="response-btn-no w-80 max-w-full"
                   variant="default"
                 >
                   ❌ NO - Can't make it
