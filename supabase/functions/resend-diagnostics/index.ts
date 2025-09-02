@@ -33,18 +33,53 @@ Deno.serve(async (req) => {
       console.error('Error fetching domains:', domainsError)
     }
 
-    // Get API key information (if available)
-    const { data: apiKeys, error: apiKeysError } = await resend.apiKeys.list()
+    // Try to get emails using the correct API method
+    let emails = null
+    let emailsError = null
     
-    if (apiKeysError) {
-      console.error('Error fetching API keys:', apiKeysError)
+    try {
+      // Use the correct method for getting emails
+      const emailResponse = await fetch('https://api.resend.com/emails', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (emailResponse.ok) {
+        const emailData = await emailResponse.json()
+        emails = emailData.data || []
+      } else {
+        emailsError = `HTTP ${emailResponse.status}: ${emailResponse.statusText}`
+      }
+    } catch (error) {
+      console.error('Error fetching emails via API:', error)
+      emailsError = error.message
     }
 
-    // Get recent emails (last 100)
-    const { data: emails, error: emailsError } = await resend.emails.list({ limit: 100 })
+    // Try to get API keys
+    let apiKeys = null
+    let apiKeysError = null
     
-    if (emailsError) {
-      console.error('Error fetching emails:', emailsError)
+    try {
+      const apiKeyResponse = await fetch('https://api.resend.com/api-keys', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (apiKeyResponse.ok) {
+        const apiKeyData = await apiKeyResponse.json()
+        apiKeys = apiKeyData.data || []
+      } else {
+        apiKeysError = `HTTP ${apiKeyResponse.status}: ${apiKeyResponse.statusText}`
+      }
+    } catch (error) {
+      console.error('Error fetching API keys:', error)
+      apiKeysError = error.message
     }
 
     // Calculate email statistics
