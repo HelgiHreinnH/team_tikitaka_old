@@ -20,14 +20,13 @@ const WhosPlaying = () => {
       const weekDate = formatWeekDate(nextWednesday);
       setCurrentWeek(weekDate);
 
-      // Fetch only safe public user data (nickname only)
+      // Fetch users and their weekly responses with explicit join
       const { data: usersData, error } = await supabase
         .from('users_public')
         .select(`
           id,
           nickname,
-          created_at,
-          weekly_responses_public!left(*)
+          created_at
         `)
         .order('nickname');
       
@@ -37,18 +36,28 @@ const WhosPlaying = () => {
         return;
       }
 
-      // Filter responses to only show current week's data with proper typing
-      const filteredData = usersData?.map(user => {
-        const filteredResponses = user.weekly_responses_public?.filter(
-          (response) => response.week_date === weekDate
-        ).map((response) => ({
-          ...response,
-          status: (response.status as ResponseStatus) || 'no_response'
-        })) || [];
+      // Fetch all weekly responses for the current week
+      const { data: responsesData, error: responsesError } = await supabase
+        .from('weekly_responses_public')
+        .select('*')
+        .eq('week_date', weekDate);
 
+      if (responsesError) {
+        console.error('Error fetching responses:', responsesError);
+        setError('Failed to load attendance data. Please try refreshing the page.');
+        return;
+      }
+      
+      // Combine users with their responses
+      const filteredData = usersData?.map(user => {
+        const userResponse = responsesData?.find(response => response.user_id === user.id);
+        
         return {
           ...user,
-          weekly_responses_public: filteredResponses
+          weekly_responses_public: userResponse ? [{
+            ...userResponse,
+            status: (userResponse.status as ResponseStatus) || 'no_response'
+          }] : []
         };
       }) || [];
 
