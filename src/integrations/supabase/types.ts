@@ -143,7 +143,14 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      validate_response_token: {
+        Args: {
+          token_value: string
+          user_id_param: string
+          week_date_param: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
