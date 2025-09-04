@@ -42,18 +42,15 @@ const Respond = () => {
         if (error || !data) {
           setNotFound(true);
         } else {
-          // Validate token hasn't expired (check if session date is in the past)
-          // Allow same-day sessions by only checking if date is before today
-          const sessionDate = new Date(data.week_date);
-          const today = new Date();
+          // Check if we're within the response window
+          // Response window: Tuesday 10:30 AM until Wednesday 8:00 PM
+          const sessionDate = new Date(data.week_date + 'T17:30:00');
+          const responseDeadline = new Date(data.week_date + 'T20:00:00'); // Wednesday 8 PM
+          const now = new Date();
           
-          // Only reject if session date is fully before today (not same day)
-          sessionDate.setHours(23, 59, 59, 999); // End of session day
-          today.setHours(0, 0, 0, 0); // Start of today
-          
-          if (sessionDate < today) {
+          if (now > responseDeadline) {
             setNotFound(true);
-            console.log('Token expired - session date is in the past');
+            console.log('Token expired - response window closed (after Wednesday 8 PM)');
           } else {
             setResponse(data as ResponseData);
           }
