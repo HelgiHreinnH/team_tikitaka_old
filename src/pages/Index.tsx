@@ -261,7 +261,7 @@ const Index = () => {
                 <div className="flex-1 flex justify-center">
                 <div 
                   className="w-full h-full min-h-[250px] lg:min-h-0 cursor-pointer rounded-lg overflow-hidden shadow-lg"
-                  onClick={() => window.open('https://maps.google.com/?q=Kunststofbanen,+Arsenalvej,+Arsenalvej+2,+1436+København', '_blank')}
+                  onClick={() => window.open('https://maps.google.com/?q=Kunststofbanen,+Arsenalvej,+Arsenalvej+2,+1436+København', '_blank', 'noopener,noreferrer')}
                 >
                     <iframe 
                       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d292.4767945840716!2d12.6027670635004!3d55.67695706315111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x465253531e198fb7%3A0x2c29b04b36ce797a!2sKunststofbanen%2C%20Arsenalvej!5e0!3m2!1sen!2sdk!4v1756320819653!5m2!1sen!2sdk" 

@@ -1,73 +1,42 @@
-# Welcome to your Lovable project
+# Tiki Taka
 
-## Project info
+Minimalist football team management web app for weekly attendance.
 
-**URL**: https://lovable.dev/projects/75d01eb3-950d-4737-856f-fc87fd961176
+## Tech Stack
 
-## How can I edit this code?
+- Vite + React 18 + TypeScript
+- Tailwind CSS + shadcn/ui
+- Supabase (DB, auth, real-time)
+- TanStack Query
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/75d01eb3-950d-4737-856f-fc87fd961176) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Getting Started
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+cd team_tikitaka
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+cp .env.example .env # fill VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Scripts
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- dev: Start dev server
+- build: Production build
+- preview: Preview production build
+- lint: Lint codebase
 
-**Use GitHub Codespaces**
+## Environment
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Create `.env` with:
 
-## What technologies are used for this project?
+```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
 
-This project is built with:
+## Project Goals
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/75d01eb3-950d-4737-856f-fc87fd961176) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Weekly invites emailed Tuesdays 10:30
+- Users respond YES/NO/MAYBE via token link
+- Public real-time attendance page

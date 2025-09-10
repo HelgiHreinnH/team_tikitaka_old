@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -144,7 +144,7 @@ const Respond = () => {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <a href="/">Go to Home</a>
+              <Link to="/">Go to Home</Link>
             </Button>
           </CardContent>
         </Card>
@@ -238,12 +238,12 @@ const Respond = () => {
           {/* Footer Links */}
           <div className="text-center mt-8 space-y-4">
             <Button variant="outline" asChild className="btn-secondary">
-              <a href="/whos-playing">See Who's Playing</a>
+              <Link to="/whos-playing">See Who's Playing</Link>
             </Button>
             
             <div>
               <Button variant="ghost" asChild className="btn-secondary">
-                <a href="/">Back to Home</a>
+                <Link to="/">Back to Home</Link>
               </Button>
             </div>
           </div>
