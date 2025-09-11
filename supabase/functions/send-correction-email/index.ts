@@ -37,6 +37,28 @@ serve(async (req) => {
   }
 
   try {
+    // Attempt to read optional JSON body for simple connectivity checks
+    let body: any = null;
+    try {
+      body = await req.json();
+    } catch (_) {
+      // no body provided – that's fine for the main send flow
+    }
+
+    // Fast path: allow the admin UI to verify connectivity without sending emails
+    if (body && body.action === 'test_connection') {
+      return new Response(
+        JSON.stringify({ ok: true, message: 'send-correction-email reachable' }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        },
+      );
+    }
+
     const baseUrl = "https://tikitaka.designingforusers.com";
     
     // Calculate next Wednesday
