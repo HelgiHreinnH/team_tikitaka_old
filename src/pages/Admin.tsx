@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { ArrowLeft, FileText, CheckCircle, AlertCircle, Activity, Mail, BarChart3, Send } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 const Admin = () => {
   const [sendingCorrection, setSendingCorrection] = useState(false);
@@ -27,10 +28,160 @@ const Admin = () => {
   const [includeResponseLink, setIncludeResponseLink] = useState(false);
   const [sendingCustomEmail, setSendingCustomEmail] = useState(false);
 
+  // Global email operation/rate limiting state
+  const [emailOperationInProgress, setEmailOperationInProgress] = useState(false);
+  const [nextAllowedEmailTime, setNextAllowedEmailTime] = useState<number | null>(null);
+  const [countdownMs, setCountdownMs] = useState<number>(0);
+  const cooldownMsRef = useRef<number>(5000); // cooldown after any email op
+  const minGapMsRef = useRef<number>(1000); // minimum 1s between requests
+
+  // Client-side rate tracking (educational UI, 2 req/s target)
+  const RATE_LIMIT_PER_SEC = 2;
+  const DEQUEUE_INTERVAL_MS = 500; // 2 per second
+  const [requestTimestamps, setRequestTimestamps] = useState<number[]>([]);
+  const [currentRatePerSec, setCurrentRatePerSec] = useState<number>(0);
+  const [isWithinLimit, setIsWithinLimit] = useState<boolean>(true);
+
+  // Local operation queue for batch-safe sending (send-test-email)
+  const [queue, setQueue] = useState<string[]>([]);
+  const [isQueueActive, setIsQueueActive] = useState<boolean>(false);
+  const dispatchTimerRef = useRef<number | null>(null);
+  const lastDispatchAtRef = useRef<number>(0);
+  const [batchSending, setBatchSending] = useState<boolean>(false);
+  const [batchTotal, setBatchTotal] = useState<number>(0);
+  const [batchSent, setBatchSent] = useState<number>(0);
+  const [batchEmailsText, setBatchEmailsText] = useState<string>("");
+
+  const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+  const recordClientRequest = () => {
+    const now = Date.now();
+    setRequestTimestamps((prev) => {
+      const next = [...prev, now].filter((t) => now - t <= 1000);
+      return next;
+    });
+  };
+
+  const waitUntilEmailAllowed = async () => {
+    const now = Date.now();
+    if (nextAllowedEmailTime && now < nextAllowedEmailTime) {
+      await sleep(nextAllowedEmailTime - now);
+    }
+  };
+
+  const beginEmailOperation = async () => {
+    if (emailOperationInProgress) {
+      return false;
+    }
+    setEmailOperationInProgress(true);
+    await waitUntilEmailAllowed();
+    return true;
+  };
+
+  const endEmailOperationWithCooldown = () => {
+    const now = Date.now();
+    // Ensure at least 1s between requests, plus cooldown
+    const nextTime = now + Math.max(minGapMsRef.current, cooldownMsRef.current);
+    setNextAllowedEmailTime(nextTime);
+    setEmailOperationInProgress(false);
+  };
+
+  // Countdown updater
+  useEffect(() => {
+    const i = setInterval(() => {
+      if (!nextAllowedEmailTime) {
+        setCountdownMs(0);
+        return;
+      }
+      const remaining = Math.max(0, nextAllowedEmailTime - Date.now());
+      setCountdownMs(remaining);
+      if (remaining === 0) {
+        setNextAllowedEmailTime(null);
+      }
+    }, 250);
+    return () => clearInterval(i);
+  }, [nextAllowedEmailTime]);
+
+  // Update current request rate and compliance indicator
+  useEffect(() => {
+    const i = setInterval(() => {
+      const now = Date.now();
+      setRequestTimestamps((prev) => prev.filter((t) => now - t <= 1000));
+      setCurrentRatePerSec((prevTs) => {
+        const count = requestTimestamps.length;
+        setIsWithinLimit(count <= RATE_LIMIT_PER_SEC);
+        return count;
+      });
+    }, 250);
+    return () => clearInterval(i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestTimestamps.length]);
+
+  const sendTestEmail = async (email: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-test-email', {
+        body: { email }
+      });
+      recordClientRequest();
+      if (error) throw error;
+      const statusText = data?.queued ? `Queued (202) for ${email}` : `Sent (200) to ${email}`;
+      const logEntry = `${new Date().toISOString()}: Test email ${statusText}`;
+      setLogs((prev) => [logEntry, ...prev]);
+    } catch (err: any) {
+      recordClientRequest();
+      const isRateLimited = err?.status === 429 || /rate limit|too many/i.test(err?.message || "");
+      const logEntry = `${new Date().toISOString()}: ERROR sending test email to ${email} - ${err?.message}`;
+      setLogs((prev) => [logEntry, ...prev]);
+      toast({
+        title: isRateLimited ? "Rate limited" : "Error",
+        description: isRateLimited ? "Too many requests. The queue will keep spacing out sends automatically." : "Failed to send test email.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Queue processor: dequeue and send every 500ms (2 req/s)
+  useEffect(() => {
+    if (dispatchTimerRef.current) return; // already running
+    dispatchTimerRef.current = window.setInterval(async () => {
+      if (queue.length === 0) return;
+      const now = Date.now();
+      const sinceLast = now - lastDispatchAtRef.current;
+      if (sinceLast < DEQUEUE_INTERVAL_MS) return;
+      const [nextEmail, ...rest] = queue;
+      setQueue(rest);
+      setIsQueueActive(true);
+      lastDispatchAtRef.current = now;
+      await sendTestEmail(nextEmail);
+      setBatchSent((s) => s + 1);
+      if (rest.length === 0) {
+        setIsQueueActive(false);
+        setBatchSending(false);
+      }
+    }, 100);
+    return () => {
+      if (dispatchTimerRef.current) {
+        clearInterval(dispatchTimerRef.current);
+        dispatchTimerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queue.length]);
+
   const sendCorrectionEmail = async () => {
+    // Prevent parallel or too-frequent requests
+    const started = await beginEmailOperation();
+    if (!started) {
+      toast({
+        title: "Please wait",
+        description: "An email operation is already in progress.",
+      });
+      return;
+    }
     setSendingCorrection(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-correction-email');
+      recordClientRequest();
       
       if (error) {
         throw error;
@@ -44,18 +195,20 @@ const Admin = () => {
       // Add to logs
       const logEntry = `${new Date().toISOString()}: Correction emails sent successfully - ${JSON.stringify(data)}`;
       setLogs(prev => [logEntry, ...prev]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending correction emails:', error);
+      const isRateLimited = error?.status === 429 || /rate limit/i.test(error?.message || "");
       const logEntry = `${new Date().toISOString()}: ERROR sending correction emails - ${error.message}`;
       setLogs(prev => [logEntry, ...prev]);
       
       toast({
-        title: "Error",
-        description: "Failed to send correction emails. Please try again.",
+        title: isRateLimited ? "Rate limited" : "Error",
+        description: isRateLimited ? "Too many requests. Please wait for the cooldown." : "Failed to send correction emails. Please try again.",
         variant: "destructive"
       });
     } finally {
       setSendingCorrection(false);
+      endEmailOperationWithCooldown();
     }
   };
 
@@ -218,6 +371,16 @@ const Admin = () => {
       return;
     }
 
+    // Prevent parallel or too-frequent requests
+    const started = await beginEmailOperation();
+    if (!started) {
+      toast({
+        title: "Please wait",
+        description: "An email operation is already in progress.",
+      });
+      return;
+    }
+
     setSendingCustomEmail(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-custom-email', {
@@ -227,6 +390,7 @@ const Admin = () => {
           includeResponseLink: includeResponseLink
         }
       });
+      recordClientRequest();
 
       if (error) {
         throw error;
@@ -246,22 +410,29 @@ const Admin = () => {
       setCustomEmailMessage("");
       setIncludeResponseLink(false);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending custom emails:', error);
+      const isRateLimited = error?.status === 429 || /rate limit/i.test(error?.message || "");
       const logEntry = `${new Date().toISOString()}: ERROR sending custom emails - ${error.message}`;
       setLogs(prev => [logEntry, ...prev]);
       
       toast({
-        title: "Error",
-        description: "Failed to send custom emails. Please try again.",
+        title: isRateLimited ? "Rate limited" : "Error",
+        description: isRateLimited ? "Too many requests. Please wait for the cooldown." : "Failed to send custom emails. Please try again.",
         variant: "destructive"
       });
     } finally {
       setSendingCustomEmail(false);
+      endEmailOperationWithCooldown();
     }
   };
 
   const currentLog = logs.length > 0 ? logs[0] : "No recent activity";
+
+  const isInEmailCooldown = !!nextAllowedEmailTime && Date.now() < (nextAllowedEmailTime || 0);
+  const secondsLeft = Math.ceil(countdownMs / 1000);
+  const nextSlotMs = Math.max(0, DEQUEUE_INTERVAL_MS - (Date.now() - lastDispatchAtRef.current));
+  const ratePct = Math.min(100, Math.round((currentRatePerSec / RATE_LIMIT_PER_SEC) * 100));
 
   return (
     <div className="min-h-screen bg-background p-2 sm:p-4">
@@ -278,6 +449,34 @@ const Admin = () => {
         </div>
 
         <div className="grid gap-4 sm:gap-6">
+          {/* Rate Limit & Queue Status */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg sm:text-xl">⏱️ Rate Limit & Queue Status</CardTitle>
+              <CardDescription className="text-sm">
+                This app respects a provider limit of 2 requests per second. Operations are spaced automatically.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6">
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`h-2.5 w-2.5 rounded-full ${isWithinLimit ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <span className="text-xs sm:text-sm">
+                      {isWithinLimit ? 'Within limit' : 'At/over limit'} • Current rate: {currentRatePerSec}/{RATE_LIMIT_PER_SEC} req/s
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Next queue slot in ~{Math.ceil(nextSlotMs / 100) / 10}s • Queue: {queue.length} pending
+                  </div>
+                </div>
+                <Progress value={ratePct} className="h-2" />
+                <div className="text-xs text-muted-foreground">
+                  Tip: If you try to send too fast, we will queue and spread requests to avoid violations.
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           {/* System Diagnostics */}
           <Card>
             <CardHeader className="pb-4">
@@ -344,12 +543,24 @@ const Admin = () => {
                   </p>
                   <Button 
                     onClick={sendCorrectionEmail}
-                    disabled={sendingCorrection}
+                    disabled={sendingCorrection || emailOperationInProgress || isInEmailCooldown}
                     className="btn-primary"
                   >
                     <Mail className="h-4 w-4 mr-2" />
-                    {sendingCorrection ? "Sending..." : "Send Correction Mail to Admin"}
+                    {sendingCorrection
+                      ? "Sending..."
+                      : (emailOperationInProgress || isInEmailCooldown)
+                        ? `Please wait${secondsLeft > 0 ? ` (${secondsLeft}s)` : ""}`
+                        : "Send Correction Mail to Admin"}
                   </Button>
+                  {(emailOperationInProgress || isInEmailCooldown) && (
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Cooldown active. You can send again in {Math.max(0, secondsLeft)}s.
+                    </div>
+                  )}
+                  <div className="text-[11px] text-muted-foreground mt-2">
+                    Rate limit help: The provider allows up to 2 requests per second. We enforce spacing and will queue if needed to prevent violations.
+                  </div>
                 </div>
 
                 <div className="p-3 sm:p-4 border rounded-lg bg-muted/50">
@@ -394,13 +605,96 @@ const Admin = () => {
 
                     <Button 
                       onClick={sendCustomEmail}
-                      disabled={sendingCustomEmail}
+                      disabled={sendingCustomEmail || emailOperationInProgress || isInEmailCooldown}
                       className="btn-primary w-full"
                     >
                       <Send className="h-4 w-4 mr-2" />
-                      {sendingCustomEmail ? "Sending..." : "Send Custom Email to All Users"}
+                      {sendingCustomEmail
+                        ? "Sending..."
+                        : (emailOperationInProgress || isInEmailCooldown)
+                          ? `Please wait${secondsLeft > 0 ? ` (${secondsLeft}s)` : ""}`
+                          : "Send Custom Email to All Users"}
                     </Button>
+                    {(emailOperationInProgress || isInEmailCooldown) && (
+                      <div className="text-xs text-muted-foreground mt-2">
+                        You can send again in {Math.max(0, secondsLeft)}s.
+                      </div>
+                    )}
+                    <div className="text-[11px] text-muted-foreground">
+                      Current rate: {currentRatePerSec}/{RATE_LIMIT_PER_SEC} req/s • Queue: {queue.length}
+                    </div>
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Batch Sending (auto-compliant) */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg sm:text-xl">📦 Batch Send (Auto Rate-Limited)</CardTitle>
+              <CardDescription className="text-sm">
+                Paste one email per line or comma-separated. We will send at 2 req/s max.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6">
+              <div className="space-y-3">
+                <Textarea
+                  placeholder="user1@example.com\nuser2@example.com, user3@example.com"
+                  className="min-h-[120px]"
+                  value={batchEmailsText}
+                  onChange={(e) => setBatchEmailsText(e.target.value)}
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    className="btn-primary"
+                    disabled={batchSending || queue.length > 0}
+                    onClick={() => {
+                      const emails = Array.from(
+                        new Set(
+                          batchEmailsText
+                            .split(/\s|,|;|\n/g)
+                            .map((s) => s.trim())
+                            .filter((s) => s && /.+@.+\..+/.test(s))
+                        )
+                      );
+                      if (emails.length === 0) {
+                        toast({ title: 'No valid emails', description: 'Please paste at least one valid email.', variant: 'destructive' });
+                        return;
+                      }
+                      setQueue(emails);
+                      setBatchSending(true);
+                      setBatchTotal(emails.length);
+                      setBatchSent(0);
+                      setLogs((prev) => [
+                        `${new Date().toISOString()}: Batch started with ${emails.length} emails (auto 2 req/s)`,
+                        ...prev,
+                      ]);
+                    }}
+                  >
+                    Start Batch
+                  </Button>
+                  <Button
+                    variant="outline"
+                    disabled={queue.length === 0 && !batchSending}
+                    onClick={() => {
+                      setQueue([]);
+                      setBatchSending(false);
+                      setBatchTotal(0);
+                      setBatchSent(0);
+                    }}
+                  >
+                    Clear
+                  </Button>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {batchSending || queue.length > 0 ? (
+                    <>
+                      Queue: {queue.length} pending • Progress: {batchSent}/{batchTotal} • Next in ~{Math.ceil(nextSlotMs / 100) / 10}s
+                    </>
+                  ) : (
+                    <>No batch in progress.</>
+                  )}
                 </div>
               </div>
             </CardContent>
