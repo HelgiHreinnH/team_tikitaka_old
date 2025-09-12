@@ -4,23 +4,15 @@ import React from 'npm:react@18.3.1'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0'
 import { WeeklyInvitationEmail } from './_templates/weekly-invitation.tsx'
 
-const resendApiKey = Deno.env.get('RESEND_API_KEY')
-const supabaseUrl = Deno.env.get('SUPABASE_URL')
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-
-if (!resendApiKey || !supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing required environment variables')
-}
-
-const resend = new Resend(resendApiKey)
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 Deno.serve(async (req) => {
+  const startTime = new Date().toISOString()
+  console.log(`[${startTime}] Weekly invites function triggered`)
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -31,6 +23,23 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Environment and client initialization inside handler for better error reporting
+    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+    const hasResendKey = !!resendApiKey
+    const hasSupabaseUrl = !!supabaseUrl
+    const hasServiceKey = !!supabaseServiceKey
+    console.log(`Environment check: Resend=${hasResendKey}, Supabase=${hasSupabaseUrl}, Service=${hasServiceKey}`)
+
+    if (!hasResendKey || !hasSupabaseUrl || !hasServiceKey) {
+      throw new Error('Missing required environment variables')
+    }
+
+    const resend = new Resend(resendApiKey as string)
+    const supabase = createClient(supabaseUrl as string, supabaseServiceKey as string)
+
     console.log('Starting weekly invite send process...')
     
     // Get next Wednesday's date - using standardized formula
@@ -64,6 +73,7 @@ Deno.serve(async (req) => {
     }
     
     if (!users || users.length === 0) {
+      console.log('No users found to send invites to')
       return new Response(JSON.stringify({ 
         success: true, 
         message: 'No users found to send invites to' 
@@ -181,7 +191,7 @@ Deno.serve(async (req) => {
           email: user.email,
           name: user.nickname || user.name,
           status: 'failed',
-          error: userError.message
+          error: (userError as Error).message
         })
       }
     }
@@ -202,9 +212,10 @@ Deno.serve(async (req) => {
     })
     
   } catch (error) {
-    console.error('Error in send-weekly-invites function:', error)
+    console.error(`[${startTime}] Function failed:`, error)
     return new Response(JSON.stringify({ 
-      error: `Failed to send weekly invites: ${error.message}` 
+      error: `Failed to send weekly invites: ${(error as Error).message}`,
+      timestamp: startTime 
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
