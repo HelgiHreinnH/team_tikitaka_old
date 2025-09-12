@@ -13,14 +13,46 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, FileText, CheckCircle, AlertCircle, Activity, Mail, BarChart3, Send } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
+type DiagnosticResult = {
+  test: string;
+  status: "success" | "error";
+  message: string;
+  details: string | null;
+};
+
+type ResendEmailStats = {
+  total: number;
+  sent: number;
+  delivered: number;
+};
+
+type ResendDomain = {
+  name: string;
+  status: string;
+};
+
+type RecentEmail = {
+  subject: string;
+  to: string | string[];
+  status: string;
+  created_at: string;
+};
+
+type ResendDiagnostics = {
+  emailStats: ResendEmailStats;
+  todaysEmails: number;
+  domains?: ResendDomain[];
+  recentEmails?: RecentEmail[];
+};
+
 const Admin = () => {
   const [sendingCorrection, setSendingCorrection] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [diagnosticsRunning, setDiagnosticsRunning] = useState(false);
-  const [diagnosticsResults, setDiagnosticsResults] = useState<any[]>([]);
+  const [diagnosticsResults, setDiagnosticsResults] = useState<DiagnosticResult[]>([]);
   const [resendDiagnosticsRunning, setResendDiagnosticsRunning] = useState(false);
-  const [resendData, setResendData] = useState<any>(null);
+  const [resendData, setResendData] = useState<ResendDiagnostics | null>(null);
   
   // Custom email state
   const [customEmailSubject, setCustomEmailSubject] = useState("");
@@ -114,7 +146,6 @@ const Admin = () => {
       });
     }, 250);
     return () => clearInterval(i);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestTimestamps.length]);
 
   const sendTestEmail = async (email: string) => {
@@ -127,10 +158,11 @@ const Admin = () => {
       const statusText = data?.queued ? `Queued (202) for ${email}` : `Sent (200) to ${email}`;
       const logEntry = `${new Date().toISOString()}: Test email ${statusText}`;
       setLogs((prev) => [logEntry, ...prev]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       recordClientRequest();
-      const isRateLimited = err?.status === 429 || /rate limit|too many/i.test(err?.message || "");
-      const logEntry = `${new Date().toISOString()}: ERROR sending test email to ${email} - ${err?.message}`;
+      const e = err as { status?: number; message?: string } | undefined;
+      const isRateLimited = e?.status === 429 || /rate limit|too many/i.test(e?.message || "");
+      const logEntry = `${new Date().toISOString()}: ERROR sending test email to ${email} - ${e?.message || 'Unknown error'}`;
       setLogs((prev) => [logEntry, ...prev]);
       toast({
         title: isRateLimited ? "Rate limited" : "Error",
@@ -165,7 +197,6 @@ const Admin = () => {
         dispatchTimerRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queue.length]);
 
   const sendCorrectionEmail = async () => {
@@ -195,10 +226,11 @@ const Admin = () => {
       // Add to logs
       const logEntry = `${new Date().toISOString()}: Correction emails sent successfully - ${JSON.stringify(data)}`;
       setLogs(prev => [logEntry, ...prev]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const e = error as { status?: number; message?: string } | undefined;
       console.error('Error sending correction emails:', error);
-      const isRateLimited = error?.status === 429 || /rate limit/i.test(error?.message || "");
-      const logEntry = `${new Date().toISOString()}: ERROR sending correction emails - ${error.message}`;
+      const isRateLimited = e?.status === 429 || /rate limit/i.test(e?.message || "");
+      const logEntry = `${new Date().toISOString()}: ERROR sending correction emails - ${e?.message || 'Unknown error'}`;
       setLogs(prev => [logEntry, ...prev]);
       
       toast({
@@ -410,10 +442,11 @@ const Admin = () => {
       setCustomEmailMessage("");
       setIncludeResponseLink(false);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const e = error as { status?: number; message?: string } | undefined;
       console.error('Error sending custom emails:', error);
-      const isRateLimited = error?.status === 429 || /rate limit/i.test(error?.message || "");
-      const logEntry = `${new Date().toISOString()}: ERROR sending custom emails - ${error.message}`;
+      const isRateLimited = e?.status === 429 || /rate limit/i.test(e?.message || "");
+      const logEntry = `${new Date().toISOString()}: ERROR sending custom emails - ${e?.message || 'Unknown error'}`;
       setLogs(prev => [logEntry, ...prev]);
       
       toast({
