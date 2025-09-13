@@ -10,7 +10,7 @@ const corsHeaders = {
 }
 
 // Rate limiting and retry configuration (aligns with send-correction-email)
-const BASE_DELAY_MS = 600 // safely under 2 req/sec
+const BASE_DELAY_MS = 500 // exactly 2 req/sec to match Resend limit
 const MAX_RETRIES = 5
 const BATCH_SIZE = 10
 const BATCH_PAUSE_MS = 1000
