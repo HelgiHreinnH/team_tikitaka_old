@@ -272,28 +272,28 @@ const Admin = () => {
     try {
       // Test database connection and count users
       console.log("Testing database connection...");
-      const { data: usersData, error: usersError, count: usersCount } = await supabase
+      const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select('*', { count: 'exact' });
+        .select('id');
       
       results.push({
         test: "Database Connection",
         status: usersError ? "error" : "success",
         message: usersError ? `Failed: ${usersError.message}` : `Success: Connected to database`,
-        details: usersError ? null : `${usersCount || 0} users in database`
+        details: usersError ? null : `${usersData?.length || 0} users in database`
       });
 
       // Test weekly responses table
       console.log("Testing weekly responses table...");
-      const { data: responsesData, error: responsesError, count: responsesCount } = await supabase
+      const { data: responsesData, error: responsesError } = await supabase
         .from('weekly_responses_public')
-        .select('*', { count: 'exact' });
+        .select('id');
       
       results.push({
         test: "Weekly Responses Table",
         status: responsesError ? "error" : "success",
         message: responsesError ? `Failed: ${responsesError.message}` : `Success: Table accessible`,
-        details: responsesError ? null : `${responsesCount || 0} responses in database`
+        details: responsesError ? null : `${responsesData?.length || 0} total responses in database`
       });
 
       // Test email function connection
