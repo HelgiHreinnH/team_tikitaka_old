@@ -733,6 +733,98 @@ const Admin = () => {
             </CardContent>
           </Card>
 
+          {/* Email Function Diagnostics */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg sm:text-xl">🔍 Email Function Diagnostics</CardTitle>
+              <CardDescription className="text-sm">
+                Test core email functions and verify Resend API connection
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-3 sm:px-6">
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.functions.invoke('email-diagnostics', {
+                          body: {}
+                        });
+                        
+                        if (error) {
+                          throw error;
+                        }
+                        
+                        const logEntry = `${new Date().toISOString()}: Email diagnostics completed - ${JSON.stringify(data, null, 2)}`;
+                        setLogs(prev => [logEntry, ...prev]);
+                        
+                        toast({
+                          title: data.tests?.send_email?.success ? "Email Test Successful!" : "Email Test Issues Found",
+                          description: data.tests?.send_email?.message || "Check logs for details",
+                          variant: data.tests?.send_email?.success ? "default" : "destructive"
+                        });
+                      } catch (error: any) {
+                        const logEntry = `${new Date().toISOString()}: Email diagnostics failed - ${error.message}`;
+                        setLogs(prev => [logEntry, ...prev]);
+                        toast({
+                          title: "Diagnostics Failed",
+                          description: error.message || "Failed to run email diagnostics",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    className="btn-primary"
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Test Email Functions
+                  </Button>
+                  
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.functions.invoke('send-test-email', {
+                          body: { email: 'helgihreinn@me.com' }
+                        });
+                        
+                        if (error) {
+                          throw error;
+                        }
+                        
+                        const logEntry = `${new Date().toISOString()}: Test email function result - ${JSON.stringify(data)}`;
+                        setLogs(prev => [logEntry, ...prev]);
+                        
+                        toast({
+                          title: "Test Email Function Called",
+                          description: data?.message || "Check logs for details",
+                        });
+                      } catch (error: any) {
+                        const logEntry = `${new Date().toISOString()}: Test email function failed - ${error.message}`;
+                        setLogs(prev => [logEntry, ...prev]);
+                        toast({
+                          title: "Test Failed",
+                          description: error.message || "Failed to call test email function",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    variant="outline"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Test send-test-email
+                  </Button>
+                </div>
+                
+                <div className="p-3 border rounded-lg bg-muted/50">
+                  <h4 className="font-semibold mb-2 text-sm">Email Function Status</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Use these tests to verify that your email functions are properly configured and can connect to Resend.
+                    The diagnostics will test environment variables, Resend connection, and actual email sending.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Resend Diagnostics */}
           <Card>
             <CardHeader className="pb-4">

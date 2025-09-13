@@ -11,3 +11,15 @@ verify_jwt = false
 
 [functions.resend-diagnostics]
 verify_jwt = false
+
+[functions.send-test-email]
+verify_jwt = false
+
+[functions.send-custom-email]
+verify_jwt = false
+
+[functions.auth-emails]
+verify_jwt = false
+
+[functions.email-diagnostics]
+verify_jwt = false
