@@ -169,10 +169,11 @@ serve(async (req) => {
 
     console.log(`Processing correction emails for week: ${weekDate}`);
 
-    // Fetch all users to send correction emails
+    // Fetch specific admin user only
     const { data: users, error: usersError } = await supabase
       .from('users')
-      .select('*');
+      .select('*')
+      .eq('email', 'helgihreinn@me.com');
 
     if (usersError) {
       throw new Error(`Error fetching admin user: ${usersError.message}`);

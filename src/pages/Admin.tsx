@@ -584,7 +584,7 @@ const Admin = () => {
                       ? "Sending..."
                       : (emailOperationInProgress || isInEmailCooldown)
                         ? `Please wait${secondsLeft > 0 ? ` (${secondsLeft}s)` : ""}`
-                        : "Send Correction Emails to All Users"}
+                        : "Send Correction Mail to Admin"}
                   </Button>
                   {(emailOperationInProgress || isInEmailCooldown) && (
                     <div className="text-xs text-muted-foreground mt-2">
