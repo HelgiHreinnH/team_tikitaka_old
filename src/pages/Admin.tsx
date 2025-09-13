@@ -467,6 +467,15 @@ const Admin = () => {
   const nextSlotMs = Math.max(0, DEQUEUE_INTERVAL_MS - (Date.now() - lastDispatchAtRef.current));
   const ratePct = Math.min(100, Math.round((currentRatePerSec / RATE_LIMIT_PER_SEC) * 100));
 
+  // Debug: log the states that control button disabled state
+  console.log('Button states:', {
+    sendingCorrection,
+    emailOperationInProgress,
+    isInEmailCooldown,
+    nextAllowedEmailTime,
+    secondsLeft
+  });
+
   return (
     <div className="min-h-screen bg-background p-2 sm:p-4">
       <div className="max-w-4xl mx-auto">
@@ -586,6 +595,35 @@ const Admin = () => {
                         ? `Please wait${secondsLeft > 0 ? ` (${secondsLeft}s)` : ""}`
                         : "Send Correction Mail to Admin"}
                   </Button>
+                  
+                   {/* Debug info for button state */}
+                   <div className="text-xs text-muted-foreground mt-2 p-2 bg-gray-50 rounded">
+                     <div>Debug: Button disabled states:</div>
+                     <div>- sendingCorrection: {sendingCorrection ? 'TRUE' : 'false'}</div>
+                     <div>- emailOperationInProgress: {emailOperationInProgress ? 'TRUE' : 'false'}</div>
+                     <div>- isInEmailCooldown: {isInEmailCooldown ? 'TRUE' : 'false'}</div>
+                     <div>- nextAllowedEmailTime: {nextAllowedEmailTime || 'null'}</div>
+                     <div>- secondsLeft: {secondsLeft}</div>
+                     
+                     {(emailOperationInProgress || isInEmailCooldown) && (
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         className="mt-2"
+                         onClick={() => {
+                           setEmailOperationInProgress(false);
+                           setNextAllowedEmailTime(null);
+                           setSendingCorrection(false);
+                           toast({
+                             title: "States Reset",
+                             description: "Email operation states have been reset manually."
+                           });
+                         }}
+                       >
+                         Force Reset States
+                       </Button>
+                     )}
+                   </div>
                   {(emailOperationInProgress || isInEmailCooldown) && (
                     <div className="text-xs text-muted-foreground mt-2">
                       Cooldown active. You can send again in {Math.max(0, secondsLeft)}s.
